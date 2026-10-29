@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { EventBriefSchema } from "@/domain/brief";
@@ -78,6 +78,54 @@ describe("ChatPanel", () => {
       await screen.findByText(/unavailable right now/),
       screen.getByLabelText("Your message"),
     ]).toEqual([expect.anything(), expect.objectContaining({ value: "Make it 100 guests" })]);
+  });
+
+  it("saves_the_follow_up_suggestions_with_the_reply", async () => {
+    requestRefine.mockResolvedValue({
+      ok: true,
+      reply: "Book the venue first.",
+      suggestions: ["Which venues fit 80 people?"],
+      brief,
+      briefChanged: false,
+    });
+    const user = userEvent.setup();
+    render(<ChatPanel plan={plan} today="2026-10-29" disabled={false} />);
+    await user.click(screen.getByRole("button", { name: "What should I book first?" }));
+    const saved = update.mock.calls[0]?.[1](plan) as SavedPlan;
+    expect(saved.chatSuggestions).toEqual(["Which venues fit 80 people?"]);
+  });
+
+  it("offers_the_latest_follow_ups_and_sends_the_one_picked", async () => {
+    requestRefine.mockResolvedValue({ ok: true, reply: "Done.", suggestions: [], brief });
+    const answered: SavedPlan = {
+      ...plan,
+      chat: [
+        { role: "user", text: "What should I book first?" },
+        { role: "assistant", text: "Book the venue first." },
+      ],
+      chatSuggestions: ["Which venues fit 80 people?", "Move it outdoors"],
+    };
+    const user = userEvent.setup();
+    render(<ChatPanel plan={answered} today="2026-10-29" disabled={false} />);
+    const followUps = screen.getByRole("list", { name: "Ask next" });
+    await user.click(within(followUps).getByRole("button", { name: "Move it outdoors" }));
+    expect(requestRefine.mock.calls[0]?.[0]).toMatchObject({
+      message: "Move it outdoors",
+      history: answered.chat,
+    });
+  });
+
+  it("hides_follow_ups_while_the_planner_is_thinking", async () => {
+    requestRefine.mockReturnValue(new Promise(() => {}));
+    const answered: SavedPlan = {
+      ...plan,
+      chat: [{ role: "assistant", text: "Hi." }],
+      chatSuggestions: ["Move it outdoors"],
+    };
+    const user = userEvent.setup();
+    render(<ChatPanel plan={answered} today="2026-10-29" disabled={false} />);
+    await user.click(screen.getByRole("button", { name: "Move it outdoors" }));
+    expect(screen.queryByRole("list", { name: "Ask next" })).toBeNull();
   });
 
   it("disables_changes_for_past_events", () => {

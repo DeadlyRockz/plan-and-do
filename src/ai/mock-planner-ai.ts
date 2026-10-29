@@ -7,6 +7,7 @@ import {
   type Subtype,
 } from "@/domain/event-types";
 import { formatMoney } from "@/domain/money";
+import { exampleChanges } from "@/domain/suggestions";
 import { joinWithAnd } from "@/domain/text";
 import { applyBriefPatch } from "./brief-patch";
 import {
@@ -36,12 +37,19 @@ export class MockPlannerAI implements PlannerAI {
   async refine({ brief, today, message }: RefineRequest): Promise<RefineResult> {
     const patch = parsePatch(message);
     if (!patch) {
-      return { reply: HELP_REPLY, brief, briefChanged: false, usage: EMPTY_USAGE };
+      return {
+        reply: HELP_REPLY,
+        suggestions: exampleChanges(brief),
+        brief,
+        briefChanged: false,
+        usage: EMPTY_USAGE,
+      };
     }
     const outcome = applyBriefPatch(brief, patch, today);
     if (!outcome.ok) {
       return {
         reply: `I couldn't apply that: ${outcome.message}`,
+        suggestions: exampleChanges(brief),
         brief,
         briefChanged: false,
         usage: EMPTY_USAGE,
@@ -51,6 +59,7 @@ export class MockPlannerAI implements PlannerAI {
     const headline = plan.warnings[0]?.title ?? "No new warnings";
     return {
       reply: `Done. I updated ${joinWithAnd(outcome.changedFields.map(fieldLabel))} and recalculated your plan: ${formatMoney(plan.context.perGuest)} per guest. ${headline}.`,
+      suggestions: exampleChanges(outcome.brief),
       brief: outcome.brief,
       briefChanged: outcome.changedFields.length > 0,
       usage: EMPTY_USAGE,

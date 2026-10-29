@@ -173,8 +173,16 @@ function textMessage(text: string, stopReason = "end_turn") {
   return { stop_reason: stopReason, usage: usage(), content: [{ type: "text", text }] };
 }
 
+/** A final turn as the structured refine format returns it. */
+function replyMessage(reply: string, suggestions: string[] = []) {
+  return textMessage(JSON.stringify({ reply, suggestions }));
+}
+
 /** Simulates the Tool Runner: the model calls the tool once with `patch`, then replies. */
-function runnerCalling(patch: BriefPatch, reply = "Updated.") {
+function runnerCalling(
+  patch: BriefPatch,
+  reply: string | ReturnType<typeof textMessage> = "Updated.",
+) {
   const toolResults: string[] = [];
   const toolRunner: RunnerFn = async function* (params) {
     yield { stop_reason: "tool_use", usage: usage(), content: [] };
@@ -183,7 +191,7 @@ function runnerCalling(patch: BriefPatch, reply = "Updated.") {
     } catch (error) {
       toolResults.push(`error: ${(error as Error).message}`);
     }
-    yield textMessage(reply);
+    yield typeof reply === "string" ? replyMessage(reply) : reply;
   };
   return { toolRunner, toolResults };
 }
@@ -229,7 +237,7 @@ describe("ClaudePlannerAI.refine", () => {
 
   it("stops_after_three_model_turns", async () => {
     const toolRunner = vi.fn<RunnerFn>(async function* () {
-      yield textMessage("Done.");
+      yield replyMessage("Done.");
     });
     await adapterWith({ toolRunner }).refine(refineRequest);
     const params = toolRunner.mock.calls[0]?.[0] as unknown as Record<string, unknown>;
@@ -241,7 +249,7 @@ describe("ClaudePlannerAI.refine", () => {
 
   it("sends_a_tool_schema_without_numeric_bounds_strict_mode_rejects", async () => {
     const toolRunner = vi.fn<RunnerFn>(async function* () {
-      yield textMessage("Done.");
+      yield replyMessage("Done.");
     });
     await adapterWith({ toolRunner }).refine(refineRequest);
     const tool = toolRunner.mock.calls[0]?.[0].tools[0] as unknown as { input_schema: unknown };
@@ -278,5 +286,51 @@ describe("ClaudePlannerAI.refine", () => {
     const { toolRunner } = runnerCalling({ ...NULL_PATCH, guestCount: 80 }, "");
     const result = await adapterWith({ toolRunner }).refine(refineRequest);
     expect(result.reply).toBe("I've updated your plan. Take a look at the budget and timeline.");
+  });
+
+  it("returns_the_reply_with_cleaned_follow_up_suggestions", async () => {
+    const toolRunner: RunnerFn = async function* () {
+      yield replyMessage("Book the venue first.", [
+        "  Which venues fit\n80 guests?  ",
+        "which venues fit 80 guests?",
+        "",
+        "x".repeat(81),
+        "Add a vegan menu",
+        "Move it outdoors",
+        "One too many",
+      ]);
+    };
+    const result = await adapterWith({ toolRunner }).refine(refineRequest);
+    expect([result.reply, result.suggestions]).toEqual([
+      "Book the venue first.",
+      ["Which venues fit 80 guests?", "Add a vegan menu", "Move it outdoors"],
+    ]);
+  });
+
+  it("asks_for_the_reply_and_suggestions_as_structured_output", async () => {
+    const toolRunner = vi.fn<RunnerFn>(async function* () {
+      yield replyMessage("Done.");
+    });
+    await adapterWith({ toolRunner }).refine(refineRequest);
+    const params = toolRunner.mock.calls[0]?.[0] as unknown as {
+      output_config: { format: { type: string; schema: { required: string[] } } };
+    };
+    expect([params.output_config.format.type, params.output_config.format.schema.required]).toEqual(
+      ["json_schema", ["reply", "suggestions"]],
+    );
+  });
+
+  it("keeps_the_brief_change_when_the_final_answer_is_not_json", async () => {
+    const { toolRunner } = runnerCalling(
+      { ...NULL_PATCH, guestCount: 80 },
+      textMessage("Updated."),
+    );
+    const result = await adapterWith({ toolRunner }).refine(refineRequest);
+    expect([
+      result.briefChanged,
+      result.brief.guestCount,
+      result.reply,
+      result.suggestions,
+    ]).toEqual([true, 80, "I've updated your plan. Take a look at the budget and timeline.", []]);
   });
 });

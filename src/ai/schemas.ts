@@ -33,3 +33,15 @@ export const BriefPatchSchema = z.strictObject({
   notes: z.string().nullable().describe("Vibe and must-haves, or null."),
 });
 export type BriefPatch = z.infer<typeof BriefPatchSchema>;
+
+/**
+ * The refine call's final answer, sent as `output_config.format`. Counts and lengths are left to
+ * `cleanSuggestions` so an over-long suggestion is dropped instead of failing the whole reply.
+ */
+export const RefineReplySchema = z.object({
+  reply: z.string().describe("Your answer to the user, in plain sentences."),
+  suggestions: z
+    .array(z.string())
+    .describe("Up to three short follow-up messages the user might send next, in their words."),
+});
+export type RefineReply = z.infer<typeof RefineReplySchema>;

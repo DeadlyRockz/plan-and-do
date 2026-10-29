@@ -111,6 +111,7 @@ export function createRefineHandler(deps: HandlerDeps) {
       log({ outcome: "ok", cacheHit: false, usage: result.usage });
       return jsonResponse({
         reply: result.reply,
+        suggestions: result.suggestions,
         brief: result.brief,
         briefChanged: result.briefChanged,
         meta: {

@@ -39,3 +39,11 @@ export const ChatTurnSchema = z.strictObject({
   text: z.string().min(1).max(MAX_TURN_CHARACTERS),
 });
 export type ChatTurn = z.infer<typeof ChatTurnSchema>;
+
+export const MAX_SUGGESTIONS = 3;
+export const MAX_SUGGESTION_CHARACTERS = 80;
+
+/** Follow-up messages offered after a planner reply, written as the user would send them. */
+export const SuggestionsSchema = z
+  .array(z.string().min(1).max(MAX_SUGGESTION_CHARACTERS))
+  .max(MAX_SUGGESTIONS);

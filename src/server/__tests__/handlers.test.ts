@@ -21,6 +21,7 @@ function fakePlanner(overrides: Partial<PlannerAI> = {}): PlannerAI {
     generateIdeas: vi.fn(async () => ({ ideas: sampleIdeas(), usage: EMPTY_USAGE })),
     refine: vi.fn(async (request) => ({
       reply: "Done.",
+      suggestions: ["Add a vegan menu"],
       brief: request.brief,
       briefChanged: false,
       usage: EMPTY_USAGE,
@@ -61,7 +62,7 @@ describe("POST /api/ai/ideas", () => {
     const body = await response.json();
     expect([response.status, body.meta]).toEqual([
       200,
-      { model: "claude-opus-5-5", adapter: "claude", cached: false, promptVersion: "ideas-v1" },
+      { model: "claude-opus-5-5", adapter: "claude", cached: false, promptVersion: "ideas-v2" },
     ]);
   });
 
@@ -180,7 +181,12 @@ describe("POST /api/ai/refine", () => {
   it("returns_the_reply_and_the_possibly_updated_brief", async () => {
     const response = await createRefineHandler(makeDeps())(post(validRefineBody));
     const body = await response.json();
-    expect([response.status, body.reply, body.briefChanged]).toEqual([200, "Done.", false]);
+    expect([response.status, body.reply, body.suggestions, body.briefChanged]).toEqual([
+      200,
+      "Done.",
+      ["Add a vegan menu"],
+      false,
+    ]);
   });
 
   it("refine_rejects_history_longer_than_ten_turns", async () => {

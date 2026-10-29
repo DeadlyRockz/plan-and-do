@@ -1,6 +1,11 @@
 import { z } from "zod";
 import { EventBriefSchema, type EventBrief } from "@/domain/brief";
-import { PlanIdeasSchema, type ChatTurn, type PlanIdeas } from "@/domain/contracts";
+import {
+  PlanIdeasSchema,
+  SuggestionsSchema,
+  type ChatTurn,
+  type PlanIdeas,
+} from "@/domain/contracts";
 import type { IsoDate } from "@/domain/dates";
 
 export type ApiFailure = {
@@ -18,7 +23,13 @@ export type IdeasSuccess = {
   promptVersion: string;
 };
 
-export type RefineSuccess = { ok: true; reply: string; brief: EventBrief; briefChanged: boolean };
+export type RefineSuccess = {
+  ok: true;
+  reply: string;
+  suggestions: string[];
+  brief: EventBrief;
+  briefChanged: boolean;
+};
 
 const ErrorEnvelopeSchema = z.object({
   error: z.object({
@@ -36,6 +47,8 @@ const IdeasResponseSchema = z.object({
 
 const RefineResponseSchema = z.object({
   reply: z.string(),
+  // Optional extras: a bad suggestion list never costs the user the reply.
+  suggestions: SuggestionsSchema.catch([]),
   brief: EventBriefSchema,
   briefChanged: z.boolean(),
 });

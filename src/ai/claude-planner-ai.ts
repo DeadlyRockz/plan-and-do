@@ -20,7 +20,8 @@ import {
 } from "./prompts";
 import { dropUnknownReferences } from "./references";
 import { PlanIdeasSchema } from "@/domain/contracts";
-import { BriefPatchSchema } from "./schemas";
+import { BriefPatchSchema, RefineReplySchema, type RefineReply } from "./schemas";
+import { cleanSuggestions } from "./suggestions";
 
 /** Settings from plan/06 §6.2. Sampling params and prefill are omitted: current models reject them. */
 const SERVER_SIDE_FALLBACK_BETA = "server-side-fallback-2026-07-01";
@@ -33,6 +34,8 @@ const MAX_RETRIES = 2;
 const UPDATE_BRIEF_DESCRIPTION =
   "Update the user's event brief when they state a change to the event's facts. Send the changed fields and null for every field that did not change. Returns the recalculated budget, timeline mode and warnings, or an error explaining why the change is invalid.";
 
+const REFINE_REPLY_FORMAT = betaZodOutputFormat(RefineReplySchema);
+
 /** Builds the adapter with a real SDK client. The key never leaves the server. */
 export function createClaudePlannerAI(apiKey: string, model: string): ClaudePlannerAI {
   const client = new Anthropic({ apiKey, timeout: REQUEST_TIMEOUT_MS, maxRetries: MAX_RETRIES });
@@ -41,7 +44,8 @@ export function createClaudePlannerAI(apiKey: string, model: string): ClaudePlan
 
 /**
  * The only module that talks to the Anthropic SDK (plan/04 §4.2). Ideas use one structured-output
- * call; refine uses the Tool Runner with a single strict tool that can only edit this brief.
+ * call; refine uses the Tool Runner with a single strict tool that can only edit this brief, and
+ * its final turn is structured output carrying the reply and follow-up suggestions.
  * The client is injected so tests run against a fake and never reach the network.
  */
 export class ClaudePlannerAI implements PlannerAI {
@@ -95,7 +99,7 @@ export class ClaudePlannerAI implements PlannerAI {
       betas: [SERVER_SIDE_FALLBACK_BETA],
       fallbacks: "default",
       system: [{ type: "text", text: REFINE_SYSTEM_PROMPT, cache_control: { type: "ephemeral" } }],
-      output_config: { effort: "low" },
+      output_config: { effort: "low", format: REFINE_REPLY_FORMAT },
       tools: [updateEventBrief],
       messages: [
         ...history.map((turn) => ({ role: turn.role, content: turn.text })),
@@ -111,8 +115,10 @@ export class ClaudePlannerAI implements PlannerAI {
     const last = turns.at(-1);
     assertUsableStopReason(last?.stop_reason ?? null);
     const briefChanged = current !== brief;
+    const answer = parseReply(last);
     return {
-      reply: replyText(last) || fallbackReply(briefChanged),
+      reply: answer?.reply.trim() || fallbackReply(briefChanged),
+      suggestions: cleanSuggestions(answer?.suggestions ?? []),
       brief: current,
       briefChanged,
       usage: usageOf(turns, 0),
@@ -163,13 +169,23 @@ function sum<T>(items: readonly T[], value: (item: T) => number): number {
   return items.reduce((total, item) => total + value(item), 0);
 }
 
-function replyText(message: Anthropic.Beta.BetaMessage | undefined): string {
-  if (!message) return "";
-  return message.content
+/**
+ * Reads the final turn's JSON answer. It is missing when the loop ran out of turns on a tool call,
+ * and unparseable only if the format was not applied; either way the caller falls back to a plain
+ * reply, so a brief change the tool already made is never lost.
+ */
+function parseReply(message: Anthropic.Beta.BetaMessage | undefined): RefineReply | undefined {
+  const text = (message?.content ?? [])
     .filter((block): block is Anthropic.Beta.BetaTextBlock => block.type === "text")
     .map((block) => block.text)
-    .join("\n")
+    .join("")
     .trim();
+  if (!text) return undefined;
+  try {
+    return REFINE_REPLY_FORMAT.parse(text);
+  } catch {
+    return undefined;
+  }
 }
 
 function fallbackReply(briefChanged: boolean): string {

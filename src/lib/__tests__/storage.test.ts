@@ -101,6 +101,13 @@ describe("PlanRepository", () => {
     ]);
   });
 
+  it("keeps_a_plan_whose_saved_suggestions_are_invalid", () => {
+    const store = new MemoryStore();
+    store.setItem(STORAGE_KEY, JSON.stringify([{ ...plan("a"), chatSuggestions: [42] }]));
+    const loaded = new PlanRepository(() => store).get("a");
+    expect([loaded?.id, loaded?.chatSuggestions]).toEqual(["a", undefined]);
+  });
+
   it("removes_a_plan", () => {
     const store = new MemoryStore();
     const repository = new PlanRepository(() => store);

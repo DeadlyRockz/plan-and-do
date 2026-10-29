@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { EventBriefSchema } from "@/domain/brief";
-import { ChatTurnSchema, PlanIdeasSchema } from "@/domain/contracts";
+import { ChatTurnSchema, PlanIdeasSchema, SuggestionsSchema } from "@/domain/contracts";
 import { isIsoDate } from "@/domain/dates";
 
 export const STORAGE_KEY = "occasio:plans:v1";
@@ -29,6 +29,8 @@ export const SavedPlanSchema = z.object({
     .optional(),
   progress: z.object({ milestones: z.array(z.string()), vendors: z.array(z.string()) }),
   chat: z.array(ChatTurnSchema).max(MAX_CHAT_TURNS),
+  /** Follow-ups offered after the latest reply. Invalid ones are dropped, never the plan. */
+  chatSuggestions: SuggestionsSchema.optional().catch(undefined),
 });
 export type SavedPlan = z.infer<typeof SavedPlanSchema>;
 

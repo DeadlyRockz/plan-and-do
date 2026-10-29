@@ -86,4 +86,10 @@ describe("api client", () => {
     });
     expect(result).toMatchObject({ ok: true, briefChanged: true, brief: { guestCount: 30 } });
   });
+
+  it("keeps_the_reply_when_the_suggestions_are_malformed", async () => {
+    respondWith(200, { reply: "Done.", suggestions: ["x".repeat(81)], brief, briefChanged: false });
+    const result = await requestRefine({ brief, today: "2026-10-29", history: [], message: "hi" });
+    expect(result).toMatchObject({ ok: true, reply: "Done.", suggestions: [] });
+  });
 });

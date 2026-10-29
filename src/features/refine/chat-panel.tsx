@@ -2,11 +2,11 @@
 
 import { PaperPlaneTiltIcon } from "@phosphor-icons/react/ssr";
 import { cn } from "cn";
-import { useEffect, useRef, useState, type FormEvent, type KeyboardEvent } from "react";
+import { useEffect, useId, useRef, useState, type FormEvent, type KeyboardEvent } from "react";
 import { toast } from "sonner";
 import { MAX_HISTORY_TURNS, MAX_MESSAGE_CHARACTERS, MAX_TURN_CHARACTERS } from "@/domain/contracts";
 import type { IsoDate } from "@/domain/dates";
-import { formatMoney } from "@/domain/money";
+import { exampleChanges } from "@/domain/suggestions";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -16,13 +16,14 @@ import { MAX_CHAT_TURNS, type SavedPlan } from "@/lib/storage";
 import { FieldError } from "@/features/intake/field";
 import { announceStorageNotices } from "@/features/shared/storage-notices";
 import { retryAtFrom, useCountdown } from "@/features/shared/use-countdown";
+import { TYPE } from "@/components/styles";
 
 type Failure = { message: string; retryAt?: number };
 
 /**
  * "Ask the planner" (plan/06 §6.5). Each turn sends the brief, the last 10 text-only turns and the
  * new message. If the assistant changes the brief, the plan is rebuilt from today and the ideas
- * are marked out of date until refreshed.
+ * are marked out of date until refreshed. Each reply comes with follow-ups the user can tap.
  */
 export function ChatPanel({
   plan,
@@ -69,6 +70,7 @@ export function ChatPanel({
     planStore.update(plan.id, (current) => ({
       ...current,
       ...(result.briefChanged && { brief: result.brief, plannedOn: today }),
+      chatSuggestions: result.suggestions,
       chat: [
         ...current.chat,
         { role: "user" as const, text: message },
@@ -96,16 +98,14 @@ export function ChatPanel({
     }
   };
 
-  const suggestions = [
-    `We're now ${Math.max(1, plan.brief.guestCount - 20)} guests`,
-    `Make the budget ${formatMoney({ minor: Math.round(plan.brief.budget.amount * 80), currency: plan.brief.budget.currency })}`,
-    "What should I book first?",
-  ];
+  const starters = [...exampleChanges(plan.brief).slice(0, 2), "What should I book first?"];
+  const followUps = plan.chatSuggestions ?? [];
+  const pick = (suggestion: string) => void send(suggestion);
 
   return (
     <section aria-labelledby="chat-title" className={cn("flex flex-col gap-4", className)}>
       <div className="flex flex-col gap-1">
-        <h2 id="chat-title" className="text-lg leading-tight font-semibold sm:text-xl">
+        <h2 id="chat-title" className={TYPE.groupTitle}>
           Ask the planner
         </h2>
         <p className="text-sm text-muted-foreground">
@@ -114,42 +114,30 @@ export function ChatPanel({
       </div>
 
       {turns.length > 0 || pending ? (
-        <ol
-          ref={logRef}
-          aria-label="Conversation"
-          className="flex max-h-96 flex-col gap-3 overflow-y-auto"
-        >
-          {turns.map((turn, index) => (
-            <ChatBubble key={index} role={turn.role} text={turn.text} />
-          ))}
-          {pending && (
-            <>
-              <ChatBubble role="user" text={pending} />
-              <li className="text-sm text-muted-foreground" aria-busy="true">
-                The planner is thinking
-              </li>
-            </>
-          )}
-        </ol>
-      ) : (
-        !disabled && (
-          <div className="flex flex-col gap-2">
-            <p className="text-sm font-medium">Try asking</p>
-            <ul className="flex flex-wrap gap-2">
-              {suggestions.map((suggestion) => (
-                <li key={suggestion}>
-                  <Button
-                    variant="outline"
-                    className="h-auto rounded-full py-2 text-left whitespace-normal"
-                    onClick={() => void send(suggestion)}
-                  >
-                    {suggestion}
-                  </Button>
+        <>
+          <ol
+            ref={logRef}
+            aria-label="Conversation"
+            className="flex max-h-96 flex-col gap-3 overflow-y-auto"
+          >
+            {turns.map((turn, index) => (
+              <ChatBubble key={index} role={turn.role} text={turn.text} />
+            ))}
+            {pending && (
+              <>
+                <ChatBubble role="user" text={pending} />
+                <li className="text-sm text-muted-foreground" aria-busy="true">
+                  The planner is thinking
                 </li>
-              ))}
-            </ul>
-          </div>
-        )
+              </>
+            )}
+          </ol>
+          {!disabled && !pending && followUps.length > 0 && (
+            <SuggestionList title="Ask next" suggestions={followUps} onPick={pick} />
+          )}
+        </>
+      ) : (
+        !disabled && <SuggestionList title="Try asking" suggestions={starters} onPick={pick} />
       )}
 
       <p className="sr-only" aria-live="polite">
@@ -195,6 +183,38 @@ export function ChatPanel({
         </form>
       )}
     </section>
+  );
+}
+
+function SuggestionList({
+  title,
+  suggestions,
+  onPick,
+}: {
+  title: string;
+  suggestions: readonly string[];
+  onPick: (suggestion: string) => void;
+}) {
+  const titleId = useId();
+  return (
+    <div className="flex flex-col gap-2">
+      <p id={titleId} className="text-sm font-medium">
+        {title}
+      </p>
+      <ul aria-labelledby={titleId} className="flex flex-wrap gap-2">
+        {suggestions.map((suggestion) => (
+          <li key={suggestion}>
+            <Button
+              variant="outline"
+              className="h-auto rounded-full py-2 text-left whitespace-normal"
+              onClick={() => onPick(suggestion)}
+            >
+              {suggestion}
+            </Button>
+          </li>
+        ))}
+      </ul>
+    </div>
   );
 }
 

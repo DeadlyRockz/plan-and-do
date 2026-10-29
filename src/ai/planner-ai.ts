@@ -26,6 +26,8 @@ export type RefineRequest = {
 };
 export type RefineResult = {
   reply: string;
+  /** Follow-up messages for the user to tap, at most `MAX_SUGGESTIONS`; may be empty. */
+  suggestions: string[];
   brief: EventBrief;
   briefChanged: boolean;
   usage: AiUsage;

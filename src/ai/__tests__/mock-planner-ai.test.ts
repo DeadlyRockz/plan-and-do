@@ -94,6 +94,19 @@ describe("MockPlannerAI", () => {
     });
     expect(result.reply).toContain("demo mode");
   });
+
+  it("follows_every_reply_with_changes_demo_mode_can_apply", async () => {
+    const result = await mock.refine({
+      brief: weddingBrief(),
+      today: TODAY,
+      history: [],
+      message: "We're now 80 guests",
+    });
+    expect([
+      result.suggestions.length,
+      result.suggestions.every((suggestion) => parsePatch(suggestion) !== undefined),
+    ]).toEqual([3, true]);
+  });
 });
 
 describe("parsePatch", () => {
