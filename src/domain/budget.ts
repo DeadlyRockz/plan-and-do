@@ -1,4 +1,4 @@
-import type { EventBrief } from "./brief";
+import { MAX_PRIORITIES, type EventBrief } from "./brief";
 import { needsCoordinator } from "./context";
 import { toMinorUnits, type Money } from "./money";
 import {
@@ -251,7 +251,7 @@ function toBudget(
 
 function validPriorities(brief: EventBrief): BudgetLineId[] {
   const options = new Set(priorityOptions(brief.eventType).map((line) => line.id));
-  return [...new Set(brief.priorities)].filter((id) => options.has(id)).slice(0, 3);
+  return [...new Set(brief.priorities)].filter((id) => options.has(id)).slice(0, MAX_PRIORITIES);
 }
 
 function baseDonors(lines: WorkingLine[]): WorkingLine[] {

@@ -6,7 +6,9 @@ export const MAX_BODY_BYTES = 16 * 1024;
 
 export type ErrorCode =
   | "VALIDATION_ERROR"
+  | "FORBIDDEN"
   | "PAYLOAD_TOO_LARGE"
+  | "UNSUPPORTED_MEDIA_TYPE"
   | "RATE_LIMITED"
   | "AI_DECLINED"
   | "AI_UNAVAILABLE"
@@ -14,7 +16,9 @@ export type ErrorCode =
 
 const STATUS: Record<ErrorCode, number> = {
   VALIDATION_ERROR: 400,
+  FORBIDDEN: 403,
   PAYLOAD_TOO_LARGE: 413,
+  UNSUPPORTED_MEDIA_TYPE: 415,
   RATE_LIMITED: 429,
   AI_DECLINED: 422,
   AI_UNAVAILABLE: 503,
@@ -24,7 +28,9 @@ const STATUS: Record<ErrorCode, number> = {
 /** User-facing messages only: no stack traces, SDK text or configuration (plan/07 §7.4). */
 const MESSAGES: Record<ErrorCode, string> = {
   VALIDATION_ERROR: "Some details need fixing.",
+  FORBIDDEN: "This request must come from the Plan and Do app.",
   PAYLOAD_TOO_LARGE: "That's too much text, please shorten it.",
+  UNSUPPORTED_MEDIA_TYPE: "The request body must be sent as JSON.",
   RATE_LIMITED: "Too many requests. Please wait a moment and try again.",
   AI_DECLINED: "The assistant couldn't help with that request.",
   AI_UNAVAILABLE:
@@ -83,6 +89,22 @@ export function validationError(error: z.ZodError): HttpError {
     fields[path] ??= issue.message;
   }
   return new HttpError("VALIDATION_ERROR", { fields });
+}
+
+/** Fetch metadata values a browser sends for a request this app's own pages made. */
+const SAME_ORIGIN_SITES = new Set(["same-origin", "none"]);
+
+/**
+ * Accepts only same-origin JSON requests (plan/09 T9). A browser marks another site's request with
+ * `Sec-Fetch-Site`, and requiring a JSON content type forces a CORS preflight these routes never
+ * answer, so a third-party page cannot spend the AI quota with a simple form or `text/plain` POST.
+ * Clients that send no fetch metadata (curl, older browsers) are still bound by the rate limits.
+ */
+export function assertSameOriginJson(request: Request): void {
+  const site = request.headers.get("sec-fetch-site");
+  if (site !== null && !SAME_ORIGIN_SITES.has(site)) throw new HttpError("FORBIDDEN");
+  const mediaType = request.headers.get("content-type")?.split(";")[0]?.trim().toLowerCase();
+  if (mediaType !== "application/json") throw new HttpError("UNSUPPORTED_MEDIA_TYPE");
 }
 
 /**

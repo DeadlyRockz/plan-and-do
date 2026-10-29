@@ -5,13 +5,8 @@ import { DatePicker } from "@/components/ui/date-picker";
 import { Input } from "@/components/ui/input";
 import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select";
 import { addYears } from "@/domain/dates";
-import {
-  EVENT_TYPES,
-  EVENT_TYPE_LABELS,
-  SUBTYPES,
-  SUBTYPE_LABELS,
-  type EventType,
-} from "@/domain/event-types";
+import { isOneOf } from "@/domain/text";
+import { EVENT_TYPES, EVENT_TYPE_LABELS, SUBTYPES, SUBTYPE_LABELS } from "@/domain/event-types";
 import { EVENT_TYPE_DESCRIPTIONS, EVENT_TYPE_ICONS } from "@/features/shared/event-meta";
 import { Field, FieldGroup } from "./field";
 import type { StepProps } from "./step-props";
@@ -24,7 +19,9 @@ export function EventStep({ values, errors, set, today }: StepProps) {
       <FieldGroup field="eventType" legend="What are you planning?" error={errors.eventType}>
         <RadioGroupPrimitive.Root
           value={values.eventType}
-          onValueChange={(value) => set("eventType", value as EventType)}
+          onValueChange={(value) => {
+            if (isOneOf(EVENT_TYPES, value)) set("eventType", value);
+          }}
           aria-invalid={errors.eventType ? true : undefined}
           className="grid grid-cols-1 gap-3 sm:grid-cols-3"
         >

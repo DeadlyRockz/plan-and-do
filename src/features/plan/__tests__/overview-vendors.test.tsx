@@ -1,9 +1,10 @@
 // @vitest-environment jsdom
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 import { EventBriefSchema } from "@/domain/brief";
 import { buildPlan } from "@/domain/build-plan";
+import { addDays } from "@/domain/dates";
 import { OverviewTab } from "../overview-tab";
 import { VendorsTab } from "../vendors-tab";
 
@@ -46,6 +47,51 @@ describe("OverviewTab", () => {
   });
 });
 
+describe("OverviewTab for a calm, on-track plan", () => {
+  const calmBrief = EventBriefSchema.parse({
+    eventType: "birthday",
+    subtype: "adult",
+    eventDate: addDays(TODAY, 60),
+    guestCount: 30,
+    budget: { amount: 60_000, currency: "INR" },
+  });
+  const calm = buildPlan(calmBrief, TODAY);
+  const renderOverview = (doneMilestones: readonly string[], today = TODAY) =>
+    render(
+      <OverviewTab
+        brief={calmBrief}
+        skeleton={calm}
+        summary={undefined}
+        doneMilestones={doneMilestones}
+        today={today}
+        onShowTimeline={() => {}}
+      />,
+    );
+
+  it("says_when_nothing_needs_attention", () => {
+    renderOverview([]);
+    expect(screen.getByText(/Nothing needs attention right now/)).toBeInTheDocument();
+  });
+
+  it("summarises_the_plan_from_the_rules_without_ideas", () => {
+    renderOverview([]);
+    expect(
+      screen.getByText("A birthday for 30 guests on Mon, 28 Dec 2026, with ₹2,000 to spend per guest."),
+    ).toBeInTheDocument();
+  });
+
+  it("celebrates_when_every_step_before_the_event_is_done", () => {
+    renderOverview(calm.milestones.map((milestone) => milestone.id));
+    expect(screen.getByText("Every step before the event is done. Enjoy the day.")).toBeInTheDocument();
+  });
+
+  it("flags_next_steps_that_are_already_late", () => {
+    renderOverview([], addDays(TODAY, 21));
+    const nextUp = screen.getByRole("heading", { name: "Next up" }).nextElementSibling;
+    expect(within(nextUp as HTMLElement).getAllByText("Overdue")).toHaveLength(1);
+  });
+});
+
 describe("VendorsTab", () => {
   const renderVendors = (today = TODAY) =>
     render(
@@ -78,5 +124,73 @@ describe("VendorsTab", () => {
   it("flags_unbooked_vendors_past_their_book_by_date", () => {
     renderVendors("2026-12-19");
     expect(screen.getAllByText("Overdue").length).toBe(skeleton.vendors.length - 1);
+  });
+
+  it("reports_booking_a_vendor", async () => {
+    const onToggle = vi.fn();
+    render(
+      <VendorsTab
+        vendors={skeleton.vendors}
+        budget={skeleton.budget}
+        tips={[]}
+        tipSource="claude"
+        booked={["security"]}
+        today={TODAY}
+        onToggle={onToggle}
+      />,
+    );
+    const user = userEvent.setup();
+    const card = (name: string) =>
+      screen.getByRole("heading", { level: 3, name }).parentElement as HTMLElement;
+    await user.click(within(card("First aid")).getByLabelText("Booked"));
+    await user.click(within(card("Security")).getByLabelText("Booked"));
+    expect(onToggle.mock.calls).toEqual([
+      ["first-aid", true],
+      ["security", false],
+    ]);
+  });
+
+  it("labels_tips_from_demo_mode_as_samples", () => {
+    render(
+      <VendorsTab
+        vendors={skeleton.vendors}
+        budget={skeleton.budget}
+        tips={[{ vendorId: "permits", tip: "Apply early." }]}
+        tipSource="mock"
+        booked={[]}
+        today={TODAY}
+        onToggle={() => {}}
+      />,
+    );
+    expect(screen.getByText("Apply early.").textContent).toBe("Sample tip: Apply early.");
+  });
+
+  it("leaves_out_paid_from_for_vendors_outside_the_budget", () => {
+    const wedding = buildPlan(
+      EventBriefSchema.parse({
+        eventType: "wedding",
+        subtype: "traditional",
+        eventDate: "2027-12-11",
+        guestCount: 120,
+        budget: { amount: 1_200_000, currency: "INR" },
+      }),
+      TODAY,
+    );
+    render(
+      <VendorsTab
+        vendors={wedding.vendors}
+        budget={wedding.budget}
+        tips={[]}
+        tipSource="claude"
+        booked={[]}
+        today={TODAY}
+        onToggle={() => {}}
+      />,
+    );
+    const card = screen.getByRole("heading", { level: 3, name: "Officiant" }).closest("li");
+    expect([
+      within(card as HTMLElement).queryByText("Paid from"),
+      screen.getAllByText("Paid from").length,
+    ]).toEqual([null, wedding.vendors.length - 1]);
   });
 });

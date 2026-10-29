@@ -2,13 +2,21 @@ import { describe, expect, it } from "vitest";
 import { buildPlan } from "../build-plan";
 import type { EventBrief } from "../brief";
 import { addDays } from "../dates";
-import { nearestOffPeakDate } from "../warnings";
+import { buildWarnings, nearestOffPeakDate, type WarningInput } from "../warnings";
 import { makeBrief, TODAY } from "./fixtures";
 
 const warningsFor = (brief: EventBrief) => buildPlan(brief, TODAY).warnings;
 const warning = (brief: EventBrief, id: string) =>
   warningsFor(brief).find((item) => item.id === id);
 const ids = (brief: EventBrief) => warningsFor(brief).map((item) => item.id);
+
+/** The rules' input for this brief, so a test can swap one part the rules engine never yields. */
+function inputFor(brief: EventBrief): WarningInput {
+  const { context, budget, milestones, vendors } = buildPlan(brief, TODAY);
+  return { brief, today: TODAY, context, budget, milestones, vendors };
+}
+const find = (input: WarningInput, id: string) =>
+  buildWarnings(input).find((item) => item.id === id);
 
 describe("buildWarnings", () => {
   it("flags_tight_budget_with_computed_raise_and_guest_cut", () => {
@@ -115,6 +123,63 @@ describe("buildWarnings", () => {
     const has = (guestCount: number) =>
       ids(makeBrief("birthday", { guestCount, dietaryNeeds: ["vegan"] })).includes("dietary-scale");
     expect([has(51), has(50)]).toEqual([true, false]);
+  });
+
+  it("leans_on_contingency_when_no_unprotected_line_is_left_to_trim", () => {
+    const input = inputFor(makeBrief("wedding", { budget: { amount: 300_000, currency: "INR" } }));
+    const onlyProtected = input.budget.lines.filter((line) => line.id === "contingency");
+    const moderate = find(
+      { ...input, budget: { ...input.budget, lines: onlyProtected } },
+      "budget-moderate",
+    );
+    expect(moderate?.suggestion).toBe("If costs run over, lean on the contingency line.");
+  });
+
+  it("tells_the_user_to_start_today_when_no_critical_step_was_squeezed", () => {
+    const input = inputFor(makeBrief("wedding", { eventDate: "2027-03-14" }));
+    const milestones = input.milestones.map((milestone) => ({ ...milestone, critical: false }));
+    expect(find({ ...input, milestones }, "timeline-compressed")?.suggestion).toBe(
+      "8 steps were squeezed into the time left. Start with the first one today.",
+    );
+  });
+
+  it("mentions_only_the_weather_cover_the_plan_actually_has", () => {
+    const input = inputFor(makeBrief("birthday", { setting: "outdoor" }));
+    const noWeatherLine = {
+      ...input,
+      budget: {
+        ...input.budget,
+        lines: input.budget.lines.filter((line) => line.id !== "weather"),
+      },
+    };
+    const noBackup = {
+      ...input,
+      milestones: input.milestones.filter((milestone) => milestone.id !== "weather-backup"),
+    };
+    expect([
+      find(noWeatherLine, "outdoor")?.suggestion,
+      find(noBackup, "outdoor")?.suggestion,
+    ]).toEqual(["Settle a fallback by Sun, 13 Dec 2026.", "A weather line of ₹2,400 is reserved."]);
+  });
+
+  it("skips_the_checklist_note_when_no_safety_vendor_is_listed", () => {
+    const input = inputFor(makeBrief("community", { guestCount: 350 }));
+    expect(find({ ...input, vendors: [] }, "large-event")?.suggestion).toBe(
+      "Plan entrances, crowd flow and toilets early.",
+    );
+  });
+
+  it("calls_an_event_over_400_guests_very_large", () => {
+    expect(warning(makeBrief("community", { guestCount: 401 }), "large-event")?.reason).toBe(
+      "401 guests is a very large event.",
+    );
+  });
+
+  it("names_every_dietary_need_in_the_scale_warning", () => {
+    expect(
+      warning(makeBrief("wedding", { dietaryNeeds: ["jain", "gluten-free"] }), "dietary-scale")
+        ?.reason,
+    ).toBe("With 120 guests and jain and gluten-free needs, mix-ups are easy.");
   });
 
   it("sorts_warnings_by_severity", () => {

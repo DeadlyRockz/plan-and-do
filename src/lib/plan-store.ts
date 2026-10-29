@@ -3,6 +3,9 @@
 import { useSyncExternalStore } from "react";
 import { PlanRepository, type SavedPlan, type StorageNotice } from "./storage";
 
+/** The two kinds of checklist progress a plan keeps. */
+export type ProgressKind = keyof SavedPlan["progress"];
+
 const repository = new PlanRepository(() =>
   typeof window === "undefined" ? undefined : window.localStorage,
 );
@@ -62,6 +65,16 @@ export const planStore = {
     if (!current) return;
     repository.save({ ...change(current), updatedAt: new Date().toISOString() });
     notify();
+  },
+  /** Marks one milestone done or one vendor booked, or clears it. */
+  setProgress(id: string, kind: ProgressKind, itemId: string, isDone: boolean): void {
+    planStore.update(id, (current) => {
+      const others = current.progress[kind].filter((value) => value !== itemId);
+      return {
+        ...current,
+        progress: { ...current.progress, [kind]: isDone ? [...others, itemId] : others },
+      };
+    });
   },
   remove(id: string): void {
     repository.remove(id);

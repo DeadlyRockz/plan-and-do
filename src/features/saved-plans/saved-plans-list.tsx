@@ -2,24 +2,15 @@
 
 import { CalendarBlankIcon, FolderOpenIcon, TrashIcon, UsersIcon } from "@phosphor-icons/react/ssr";
 import Link from "next/link";
-import { toast } from "sonner";
+import { toLocalIsoDate } from "@/domain/dates";
 import { EVENT_TYPE_LABELS } from "@/domain/event-types";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { formatDate } from "@/lib/format";
-import { planStore, usePlans } from "@/lib/plan-store";
+import { formatCount, formatDate } from "@/lib/format";
+import { usePlans } from "@/lib/plan-store";
 import type { SavedPlan } from "@/lib/storage";
+import { DeletePlanDialog, deletePlanWithUndo } from "@/features/shared/delete-plan";
 import { EVENT_TYPE_ICONS, eventTitle } from "@/features/shared/event-meta";
 import { useStorageNotices } from "@/features/shared/storage-notices";
 import { SPACE, TYPE } from "@/components/styles";
@@ -52,13 +43,6 @@ export function SavedPlansList() {
 function SavedPlanRow({ plan }: { plan: SavedPlan }) {
   const title = eventTitle(plan.brief);
   const TypeIcon = EVENT_TYPE_ICONS[plan.brief.eventType];
-  const remove = () => {
-    planStore.remove(plan.id);
-    toast("Plan deleted", {
-      duration: 5000,
-      action: { label: "Undo", onClick: () => planStore.save(plan) },
-    });
-  };
   return (
     <li
       className={cn(
@@ -89,9 +73,9 @@ function SavedPlanRow({ plan }: { plan: SavedPlan }) {
             </li>
             <li className="flex items-center gap-1.5">
               <UsersIcon size={16} aria-hidden="true" />
-              {plan.brief.guestCount.toLocaleString("en-US")} guests
+              {formatCount(plan.brief.guestCount)} guests
             </li>
-            <li>Updated {formatDate(plan.updatedAt.slice(0, 10))}</li>
+            <li>Updated {formatDate(toLocalIsoDate(new Date(plan.updatedAt)))}</li>
           </ul>
         </div>
       </div>
@@ -103,24 +87,12 @@ function SavedPlanRow({ plan }: { plan: SavedPlan }) {
         >
           Open
         </Link>
-        <AlertDialog>
-          <AlertDialogTrigger asChild>
-            <Button variant="ghost" aria-label={`Delete ${title}`}>
-              <TrashIcon size={18} aria-hidden="true" />
-              Delete
-            </Button>
-          </AlertDialogTrigger>
-          <AlertDialogContent>
-            <AlertDialogTitle>Delete {title}?</AlertDialogTitle>
-            <AlertDialogDescription>
-              It will be removed from this browser. You can undo for a few seconds afterwards.
-            </AlertDialogDescription>
-            <AlertDialogFooter>
-              <AlertDialogCancel>Keep it</AlertDialogCancel>
-              <AlertDialogAction onClick={remove}>Delete plan</AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
+        <DeletePlanDialog planTitle={title} onConfirm={() => deletePlanWithUndo(plan)}>
+          <Button variant="ghost" aria-label={`Delete ${title}`}>
+            <TrashIcon size={18} aria-hidden="true" />
+            Delete
+          </Button>
+        </DeletePlanDialog>
       </div>
     </li>
   );

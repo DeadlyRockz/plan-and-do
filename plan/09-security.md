@@ -15,8 +15,9 @@ through model output.
 | T4 | User's browser                 | XSS through model output or brief text                         | React escaping only; no `dangerouslySetInnerHTML`, no markdown-to-HTML, no auto-linked URLs; strict CSP        | ESLint `react/no-danger`; CSP header test      |
 | T5 | Server                         | Oversized or malformed JSON, prototype pollution in the patch merge | Body-size guard before parsing; Zod `strict()` objects; patch merged by copying only whitelisted keys     | Route tests                                    |
 | T6 | Privacy                        | Personal data in logs or over-collection                       | Logs hold metadata only (06 §6.9); city-level location; no names, phones or addresses asked; disclosure in the UI | Test asserting the logger never gets brief text |
-| T7 | Supply chain                   | A vulnerable or malicious dependency                           | Lockfile committed; `npm ci`; `npm audit --audit-level=high` in CI; minimal dependencies (03 §3.3)            | CI                                             |
-| T8 | Clickjacking and sniffing      | The app embedded in a frame or content-type confusion          | `frame-ancestors 'none'`, `X-Content-Type-Options: nosniff`                                                   | Header test                                    |
+| T7 | Supply chain                   | A vulnerable or malicious dependency                           | Lockfile committed; `npm ci`; `npm audit` clean (0 known vulnerabilities) and gated at `high` in CI; minimal dependencies, no unused CLIs installed (03 §3.3) | CI                                             |
+| T8 | Clickjacking and sniffing      | The app embedded in a frame, content-type confusion, or a cross-origin window reaching ours | `frame-ancestors 'none'`, `X-Frame-Options: DENY`, `nosniff`, `Cross-Origin-Opener-Policy` and `Cross-Origin-Resource-Policy: same-origin` | `security-headers.test.ts`, `csp.test.ts`      |
+| T9 | API spend                      | Another website makes visitors' browsers call the AI routes (cross-site request forgery) | AI routes accept only `Content-Type: application/json`, which forces a CORS preflight they never answer, and reject any `Sec-Fetch-Site` other than `same-origin` | Route tests for 403 and 415                    |
 
 ## 9.2 Secrets
 
@@ -54,15 +55,18 @@ through model output.
   restart. That's acceptable for a single-instance demo and is stated in the README. The upgrade
   path is a shared store (Redis) behind the same `RateLimiter` interface.
 
-## 9.5 HTTP security headers (`next.config` `headers()`)
+## 9.5 HTTP security headers (`src/server/security-headers.ts`, `src/server/csp.ts`)
 
 | Header                      | Value                                                                                                            |
 | --------------------------- | ---------------------------------------------------------------------------------------------------------------- |
 | `Content-Security-Policy`   | `default-src 'self'; script-src 'self' 'nonce-…'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; font-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'` |
 | `X-Content-Type-Options`    | `nosniff`                                                                                                        |
 | `Referrer-Policy`           | `strict-origin-when-cross-origin`                                                                                |
-| `Permissions-Policy`        | `camera=(), microphone=(), geolocation=()`                                                                       |
-| `Strict-Transport-Security` | `max-age=63072000; includeSubDomains` (only when deployed over HTTPS)                                            |
+| `Permissions-Policy`        | `camera=(), microphone=(), geolocation=(), payment=(), usb=(), browsing-topics=()`                               |
+| `Cross-Origin-Opener-Policy` | `same-origin`                                                                                                   |
+| `Cross-Origin-Resource-Policy` | `same-origin`                                                                                                 |
+| `X-Frame-Options`           | `DENY` (for browsers that predate `frame-ancestors`)                                                             |
+| `Strict-Transport-Security` | `max-age=63072000; includeSubDomains; preload` (production only)                                                 |
 
 `connect-src 'self'` is possible because the browser never talks to Anthropic directly. For
 Next.js inline scripts, use nonce-based CSP following the current Next.js docs; no

@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { EventBriefSchema } from "@/domain/brief";
-import { requestIdeas, requestRefine } from "../api-client";
+import { isAbortError, requestIdeas, requestRefine } from "../api-client";
 
 const brief = EventBriefSchema.parse({
   eventType: "birthday",
@@ -91,5 +91,83 @@ describe("api client", () => {
     respondWith(200, { reply: "Done.", suggestions: ["x".repeat(81)], brief, briefChanged: false });
     const result = await requestRefine({ brief, today: "2026-10-29", history: [], message: "hi" });
     expect(result).toMatchObject({ ok: true, reply: "Done.", suggestions: [] });
+  });
+
+  it("posts_the_brief_as_json_with_the_abort_signal", async () => {
+    respondWith(200, { ideas, meta: { adapter: "mock", promptVersion: "ideas-v1" } });
+    const controller = new AbortController();
+    await requestIdeas(brief, "2026-10-29", controller.signal);
+    const [url, init] = vi.mocked(fetch).mock.calls[0] ?? [];
+    expect([
+      url,
+      init?.method,
+      init?.headers,
+      JSON.parse(String(init?.body)),
+      init?.signal,
+    ]).toEqual([
+      "/api/ai/ideas",
+      "POST",
+      { "content-type": "application/json" },
+      { brief, today: "2026-10-29" },
+      controller.signal,
+    ]);
+  });
+
+  it("rethrows_an_aborted_request_instead_of_reporting_it_offline", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => Promise.reject(new DOMException("The user aborted.", "AbortError"))),
+    );
+    await expect(requestIdeas(brief, "2026-10-29")).rejects.toMatchObject({ name: "AbortError" });
+  });
+
+  it("gives_the_generic_failure_for_an_error_body_that_is_not_json", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => new Response("<html>Bad gateway</html>", { status: 502 })),
+    );
+    expect(await requestIdeas(brief, "2026-10-29")).toEqual({
+      ok: false,
+      code: "INTERNAL",
+      message: "Something went wrong on our side. Please try again.",
+    });
+  });
+
+  it("gives_the_generic_failure_for_an_error_body_without_the_envelope", async () => {
+    respondWith(500, { message: "boom" });
+    expect(await requestIdeas(brief, "2026-10-29")).toMatchObject({ ok: false, code: "INTERNAL" });
+  });
+
+  it("passes_field_errors_through_from_the_envelope", async () => {
+    respondWith(400, {
+      error: {
+        code: "INVALID_BRIEF",
+        message: "Check the form.",
+        fields: { guestCount: "Too many." },
+      },
+    });
+    expect(await requestIdeas(brief, "2026-10-29")).toEqual({
+      ok: false,
+      code: "INVALID_BRIEF",
+      message: "Check the form.",
+      fields: { guestCount: "Too many." },
+    });
+  });
+
+  it("treats_a_malformed_refine_body_as_an_internal_error", async () => {
+    respondWith(200, { reply: 42, brief, briefChanged: false });
+    const result = await requestRefine({ brief, today: "2026-10-29", history: [], message: "hi" });
+    expect(result).toMatchObject({ ok: false, code: "INTERNAL" });
+  });
+});
+
+describe("isAbortError", () => {
+  it("is_true_only_for_the_abort_dom_exception", () => {
+    expect([
+      isAbortError(new DOMException("aborted", "AbortError")),
+      isAbortError(new DOMException("timed out", "TimeoutError")),
+      isAbortError(Object.assign(new Error("aborted"), { name: "AbortError" })),
+      isAbortError("AbortError"),
+    ]).toEqual([true, false, false, false]);
   });
 });

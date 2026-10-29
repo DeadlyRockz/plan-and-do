@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Notice } from "@/features/shared/notice";
-import { useCountdown } from "@/features/shared/use-countdown";
+import { useCountdown, type RetryWindow } from "@/features/shared/use-countdown";
 import { GroupHeading, PanelHeading } from "./panel-heading";
 import type { IdeasState } from "./use-ideas";
 import { SPACE, TYPE } from "@/components/styles";
@@ -23,7 +23,9 @@ export function IdeasTab({ state, budget, onRefresh }: { state: IdeasState; budg
       {state.status === "idle" && (
         <Notice title="This event has passed">New ideas aren’t generated for past events.</Notice>
       )}
-      {state.status === "error" && <IdeasError message={state.message} retryAt={state.retryAt} onRetry={onRefresh} />}
+      {state.status === "error" && (
+        <IdeasError message={state.message} retry={state.retry} onRetry={onRefresh} />
+      )}
       {state.status === "ready" && (
         <>
           {state.isDemo && (
@@ -53,6 +55,12 @@ export function IdeasTab({ state, budget, onRefresh }: { state: IdeasState; budg
 
 function IdeasContent({ ideas, budget }: { ideas: PlanIdeas; budget: Budget }) {
   const featured = ideas.themes.length === 3;
+  // Out-of-date ideas can name a line this budget no longer has; those are left out.
+  const lineLabels = new Map<string, string>(budget.lines.map((line) => [line.id, line.label]));
+  const savingIdeas = ideas.savingIdeas.flatMap((saving) => {
+    const label = lineLabels.get(saving.budgetLineId);
+    return label ? [{ ...saving, label }] : [];
+  });
   return (
     <>
       <p className={TYPE.lead}>{ideas.summary}</p>
@@ -61,7 +69,10 @@ function IdeasContent({ ideas, budget }: { ideas: PlanIdeas; budget: Budget }) {
         <GroupHeading id="themes-title">Themes</GroupHeading>
         <ul className="grid grid-cols-1 gap-4 md:grid-cols-2">
           {ideas.themes.map((theme, index) => (
-            <li key={theme.name} className={cn(featured && index === 0 && "md:col-span-2")}>
+            <li
+              key={`${index}-${theme.name}`}
+              className={cn(featured && index === 0 && "md:col-span-2")}
+            >
               <Card className="h-full">
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <h4 className={TYPE.cardTitle}>{theme.name}</h4>
@@ -81,14 +92,17 @@ function IdeasContent({ ideas, budget }: { ideas: PlanIdeas; budget: Budget }) {
         </ul>
       </section>
 
-      {ideas.savingIdeas.length > 0 && (
+      {savingIdeas.length > 0 && (
         <section aria-labelledby="saving-title" className="flex flex-col gap-4">
           <GroupHeading id="saving-title">Ways to save</GroupHeading>
           <ul className="flex flex-col divide-y rounded-xl border bg-card sm:rounded-2xl">
-            {ideas.savingIdeas.map((idea) => (
-              <li key={`${idea.budgetLineId}-${idea.idea}`} className={cn("flex flex-col gap-2 sm:flex-row sm:items-start sm:gap-4", SPACE.row)}>
-                <Badge className="sm:mt-0.5">{budget.lines.find((line) => line.id === idea.budgetLineId)?.label}</Badge>
-                <span className="text-sm">{idea.idea}</span>
+            {savingIdeas.map((saving, index) => (
+              <li
+                key={`${index}-${saving.budgetLineId}`}
+                className={cn("flex flex-col gap-2 sm:flex-row sm:items-start sm:gap-4", SPACE.row)}
+              >
+                <Badge className="sm:mt-0.5">{saving.label}</Badge>
+                <span className="text-sm">{saving.idea}</span>
               </li>
             ))}
           </ul>
@@ -99,8 +113,8 @@ function IdeasContent({ ideas, budget }: { ideas: PlanIdeas; budget: Budget }) {
         <section aria-labelledby="considerations-title" className="flex flex-col gap-4">
           <GroupHeading id="considerations-title">Worth keeping in mind</GroupHeading>
           <ul className="flex list-disc flex-col gap-2 pl-5 text-sm">
-            {ideas.considerations.map((item) => (
-              <li key={item}>{item}</li>
+            {ideas.considerations.map((item, index) => (
+              <li key={`${index}-${item}`}>{item}</li>
             ))}
           </ul>
         </section>
@@ -115,8 +129,8 @@ function IdeaList({ title, items }: { title: string; items: readonly string[] })
     <div className="flex flex-col gap-1.5">
       <p className="text-sm font-medium">{title}</p>
       <ul className="flex list-disc flex-col gap-1 pl-5 text-sm text-muted-foreground">
-        {items.map((item) => (
-          <li key={item}>{item}</li>
+        {items.map((item, index) => (
+          <li key={`${index}-${item}`}>{item}</li>
         ))}
       </ul>
     </div>
@@ -137,8 +151,16 @@ function IdeasSkeleton() {
   );
 }
 
-function IdeasError({ message, retryAt, onRetry }: { message: string; retryAt?: number; onRetry: () => void }) {
-  const secondsLeft = useCountdown(retryAt);
+function IdeasError({
+  message,
+  retry,
+  onRetry,
+}: {
+  message: string;
+  retry?: RetryWindow;
+  onRetry: () => void;
+}) {
+  const secondsLeft = useCountdown(retry);
   return (
     <Notice
       tone="warning"

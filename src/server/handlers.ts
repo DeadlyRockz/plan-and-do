@@ -13,6 +13,7 @@ import {
 import { createEventBriefSchema, stripControlCharacters, type EventBrief } from "@/domain/brief";
 import { buildPlan } from "@/domain/build-plan";
 import {
+  assertSameOriginJson,
   errorResponse,
   HttpError,
   jsonResponse,
@@ -21,7 +22,12 @@ import {
   validationError,
 } from "./http";
 import type { AiCallLog, AiCallLogger } from "./logger";
-import { clientKey, type DailyCap, type SlidingWindowLimiter } from "./rate-limit";
+import {
+  clientKey,
+  type DailyCap,
+  type LimitDecision,
+  type SlidingWindowLimiter,
+} from "./rate-limit";
 import type { LruCache } from "./response-cache";
 import { resolveToday } from "./today";
 
@@ -47,23 +53,25 @@ const RefineRequestSchema = z.strictObject({
   today: z.string().optional(),
   history: z
     .array(ChatTurnSchema)
-    .max(MAX_HISTORY_TURNS, "Send at most 10 earlier messages.")
+    .max(MAX_HISTORY_TURNS, `Send at most ${MAX_HISTORY_TURNS} earlier messages.`)
     .default([]),
   message: z
     .string()
     .overwrite((value) => stripControlCharacters(value).trim())
     .min(1, "Type a message.")
-    .max(MAX_MESSAGE_CHARACTERS, "Keep the message to 500 characters or fewer."),
+    .max(
+      MAX_MESSAGE_CHARACTERS,
+      `Keep the message to ${MAX_MESSAGE_CHARACTERS} characters or fewer.`,
+    ),
 });
 
-/** POST /api/ai/ideas: body cap, then rate limit, then validation, then cache, then Claude. */
+/** POST /api/ai/ideas: admission checks, then validation, then cache, then Claude. */
 export function createIdeasHandler(deps: HandlerDeps) {
   return async function handleIdeas(request: Request): Promise<Response> {
     const startedAt = deps.now().getTime();
     const log = callLogger(deps, "ideas", startedAt);
     try {
-      const body = await readJsonBody(request);
-      enforce(deps.limiters.ideas.check(clientKey(request, deps.trustProxy), startedAt));
+      const body = await admit(request, deps.limiters.ideas, deps.trustProxy, startedAt);
       const envelope = IdeasRequestSchema.safeParse(body);
       if (!envelope.success) throw validationError(envelope.error);
       const { brief, today } = parseBrief(envelope.data.brief, envelope.data.today, deps.now());
@@ -95,8 +103,7 @@ export function createRefineHandler(deps: HandlerDeps) {
     const startedAt = deps.now().getTime();
     const log = callLogger(deps, "refine", startedAt);
     try {
-      const body = await readJsonBody(request);
-      enforce(deps.limiters.refine.check(clientKey(request, deps.trustProxy), startedAt));
+      const body = await admit(request, deps.limiters.refine, deps.trustProxy, startedAt);
       const parsed = RefineRequestSchema.safeParse(body);
       if (!parsed.success) throw validationError(parsed.error);
       const { brief, today } = parseBrief(parsed.data.brief, parsed.data.today, deps.now());
@@ -133,6 +140,22 @@ export function createHealthHandler(deps: Pick<HandlerDeps, "planner">) {
   };
 }
 
+/**
+ * The checks every AI route runs before any real work, cheapest first: same-origin JSON only,
+ * the 16 KB body cap, then the per-client rate limit.
+ */
+async function admit(
+  request: Request,
+  limiter: SlidingWindowLimiter,
+  trustProxy: boolean,
+  now: number,
+): Promise<unknown> {
+  assertSameOriginJson(request);
+  const body = await readJsonBody(request);
+  enforce(limiter.check(clientKey(request, trustProxy), now));
+  return body;
+}
+
 /** Re-validates the brief on the server against the server-checked `today` (plan/04 §4.1). */
 function parseBrief(
   rawBrief: unknown,
@@ -145,9 +168,7 @@ function parseBrief(
   return { brief: brief.data, today };
 }
 
-function enforce(
-  decision: { allowed: true } | { allowed: false; retryAfterSeconds: number },
-): void {
+function enforce(decision: LimitDecision): void {
   if (!decision.allowed) {
     throw new HttpError("RATE_LIMITED", { retryAfterSeconds: decision.retryAfterSeconds });
   }

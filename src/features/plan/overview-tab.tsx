@@ -6,12 +6,15 @@ import type { Warning } from "@/domain/warnings";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { formatDate, formatMoney } from "@/lib/format";
+import { formatCount, formatDate, formatMoney } from "@/lib/format";
 import { EVENT_TYPE_LABELS } from "@/domain/event-types";
 import { SEVERITY_STATUS, StatusBadge } from "@/features/shared/status-badges";
 import { GroupHeading, PanelHeading } from "./panel-heading";
 import { SPACE, TYPE } from "@/components/styles";
 import { cn } from "cn";
+
+/** How many open milestones "Next up" lists before pointing to the full timeline. */
+const NEXT_UP_COUNT = 3;
 
 type OverviewProps = {
   brief: EventBrief;
@@ -25,7 +28,7 @@ type OverviewProps = {
 export function OverviewTab({ brief, skeleton, summary, doneMilestones, today, onShowTimeline }: OverviewProps) {
   const nextUp = skeleton.milestones
     .filter((milestone) => !milestone.isPostEvent && !doneMilestones.includes(milestone.id))
-    .slice(0, 3);
+    .slice(0, NEXT_UP_COUNT);
 
   return (
     <div className="flex flex-col gap-8">
@@ -89,5 +92,5 @@ function WarningItem({ warning }: { warning: Warning }) {
 }
 
 function rulesSummary(brief: EventBrief, skeleton: PlanSkeleton): string {
-  return `A ${EVENT_TYPE_LABELS[brief.eventType].toLowerCase()} for ${brief.guestCount.toLocaleString("en-US")} guests on ${formatDate(brief.eventDate)}, with ${formatMoney(skeleton.context.perGuest)} to spend per guest.`;
+  return `A ${EVENT_TYPE_LABELS[brief.eventType].toLowerCase()} for ${formatCount(brief.guestCount)} guests on ${formatDate(brief.eventDate)}, with ${formatMoney(skeleton.context.perGuest)} to spend per guest.`;
 }

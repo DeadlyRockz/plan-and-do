@@ -2,7 +2,7 @@ import { InfoIcon, StarIcon } from "@phosphor-icons/react/ssr";
 import type { Budget } from "@/domain/budget";
 import type { PlanIdeas } from "@/domain/contracts";
 import { Badge } from "@/components/ui/badge";
-import { formatMoney, formatShare } from "@/lib/format";
+import { formatCount, formatMoney, formatShare } from "@/lib/format";
 import { PanelHeading } from "./panel-heading";
 
 const RANK_LABELS = ["Top priority", "2nd priority", "3rd priority"];
@@ -32,7 +32,7 @@ export function BudgetTab({
             <span className="font-semibold">{formatMoney(budget.total)}</span>
             <span className="text-muted-foreground">
               {" "}
-              for {guestCount.toLocaleString("en-US")} guests, about {formatMoney(perGuest)} each
+              for {formatCount(guestCount)} guests, about {formatMoney(perGuest)} each
             </span>
           </caption>
           <thead>

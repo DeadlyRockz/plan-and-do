@@ -1,5 +1,6 @@
 "use client";
 
+import { isOneOf } from "@/domain/text";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
@@ -18,10 +19,13 @@ export function RadioRow<Value extends string>({
   value: Value;
   onChange: (value: Value) => void;
 }) {
+  const values = options.map((option) => option.value);
   return (
     <RadioGroup
       value={value}
-      onValueChange={(next) => onChange(next as Value)}
+      onValueChange={(next) => {
+        if (isOneOf(values, next)) onChange(next);
+      }}
       className="flex flex-wrap gap-x-6 gap-y-1"
     >
       {options.map((option) => (

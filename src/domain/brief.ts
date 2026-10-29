@@ -2,11 +2,13 @@ import { z } from "zod";
 import { addYears, isIsoDate, type IsoDate } from "./dates";
 import {
   ACCESSIBILITY_NEEDS,
+  ALL_SUBTYPES,
   DIETARY_NEEDS,
   EVENT_TYPES,
   SETTINGS,
   SUBTYPES,
   type EventType,
+  type Subtype,
 } from "./event-types";
 import { CURRENCIES } from "./money";
 import { BUDGET_LINE_IDS, priorityOptions } from "./reference/budget-lines";
@@ -70,9 +72,7 @@ function buildBriefSchema(today?: IsoDate) {
   return z
     .strictObject({
       eventType: z.enum(EVENT_TYPES, { error: "Choose the kind of event." }),
-      subtype: z
-        .string({ error: "Choose what kind of event this is." })
-        .min(1, "Choose what kind of event this is."),
+      subtype: z.enum(ALL_SUBTYPES, { error: "Choose what kind of event this is." }),
       eventName: freeText(TEXT_LIMITS.eventName, "Event name")
         .min(1, "Event name can't be blank.")
         .optional(),
@@ -100,7 +100,7 @@ function buildBriefSchema(today?: IsoDate) {
     .superRefine((brief, ctx) => {
       // Cross-field rules. The form can't break them (its options follow the event type), so
       // they guard the API against crafted input.
-      const subtypes: readonly string[] = SUBTYPES[brief.eventType];
+      const subtypes: readonly Subtype[] = SUBTYPES[brief.eventType];
       if (!subtypes.includes(brief.subtype)) {
         ctx.addIssue({
           code: "custom",

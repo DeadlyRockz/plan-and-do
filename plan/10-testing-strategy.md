@@ -21,9 +21,12 @@ test is named for the behaviour it checks, follows Arrange–Act–Assert, and a
 
 ## 10.2 Coverage targets
 
-- `src/domain/`: ≥ 90% lines and branches. CI enforces it with a Vitest threshold scoped to
-  this folder.
-- Overall: ≥ 75%, as a signal rather than a goal (Rule 03.4).
+- `src/domain/`: ≥ 99% lines and ≥ 90% branches. CI enforces it with a Vitest threshold scoped
+  to this folder. The branches left are `?? 0n` fallbacks that exist only for
+  `noUncheckedIndexedAccess`.
+- Overall: ≥ 98% lines and statements, ≥ 99% functions and ≥ 95% branches, set just below the
+  current figures (99.9% lines, 97.4% branches) so an untested change fails CI. Coverage stays a
+  signal, not a goal (Rule 03.4): every test checks behaviour a user or caller relies on.
 
 ## 10.3 Test cases
 

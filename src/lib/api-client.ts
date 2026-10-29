@@ -65,6 +65,11 @@ const UNEXPECTED: ApiFailure = {
   message: "Something went wrong on our side. Please try again.",
 };
 
+/** True for the error `fetch` throws when its `AbortSignal` fires; callers ignore it. */
+export function isAbortError(error: unknown): boolean {
+  return error instanceof DOMException && error.name === "AbortError";
+}
+
 /** One Claude call for the whole plan's ideas (plan/04 §4.3 B). */
 export async function requestIdeas(
   brief: EventBrief,
@@ -111,7 +116,7 @@ async function postJson(
       signal,
     });
   } catch (error) {
-    if (error instanceof DOMException && error.name === "AbortError") throw error;
+    if (isAbortError(error)) throw error;
     return OFFLINE;
   }
   const json: unknown = await response.json().catch(() => undefined);

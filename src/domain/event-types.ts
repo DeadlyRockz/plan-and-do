@@ -8,6 +8,9 @@ export const SUBTYPES = {
 } as const satisfies Record<EventType, readonly string[]>;
 export type Subtype = (typeof SUBTYPES)[EventType][number];
 
+/** Every subtype across all event types; the brief checks the pairing separately. */
+export const ALL_SUBTYPES: readonly Subtype[] = EVENT_TYPES.flatMap((type) => SUBTYPES[type]);
+
 export const SETTINGS = ["indoor", "outdoor", "either"] as const;
 export type Setting = (typeof SETTINGS)[number];
 

@@ -7,7 +7,10 @@ import type { SavedPlan } from "@/lib/storage";
 import { useIdeas } from "../use-ideas";
 
 const requestIdeas = vi.fn();
-vi.mock("@/lib/api-client", () => ({ requestIdeas: (...args: unknown[]) => requestIdeas(...args) }));
+vi.mock("@/lib/api-client", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@/lib/api-client")>()),
+  requestIdeas: (...args: unknown[]) => requestIdeas(...args),
+}));
 const update = vi.fn();
 vi.mock("@/lib/plan-store", () => ({ planStore: { update: (...args: unknown[]) => update(...args) } }));
 
@@ -41,6 +44,22 @@ describe("useIdeas", () => {
     const { result } = renderHook(() => useIdeas(basePlan, "2026-10-29", false));
     expect(result.current.state.status).toBe("loading");
     await waitFor(() => expect(update).toHaveBeenCalledOnce());
+  });
+
+  it("abandons_the_request_quietly_when_the_page_closes_first", async () => {
+    requestIdeas.mockImplementation(
+      (_brief: unknown, _today: unknown, signal: AbortSignal) =>
+        new Promise((_resolve, reject) =>
+          signal.addEventListener("abort", () =>
+            reject(new DOMException("The page closed.", "AbortError")),
+          ),
+        ),
+    );
+    const { unmount } = renderHook(() => useIdeas(basePlan, "2026-10-29", false));
+    const signal = requestIdeas.mock.calls[0]?.[2] as AbortSignal;
+    unmount();
+    await Promise.resolve();
+    expect([signal.aborted, update.mock.calls.length]).toEqual([true, 0]);
   });
 
   it("reports_an_error_with_a_retry_time", async () => {

@@ -80,6 +80,25 @@ describe("ChatPanel", () => {
     ]).toEqual([expect.anything(), expect.objectContaining({ value: "Make it 100 guests" })]);
   });
 
+  it("says_when_a_rate_limited_message_can_be_sent_again", async () => {
+    requestRefine.mockResolvedValue({
+      ok: false,
+      code: "RATE_LIMITED",
+      message: "Too many requests.",
+      retryAfterSeconds: 30,
+    });
+    const user = userEvent.setup();
+    render(<ChatPanel plan={plan} today="2026-10-29" disabled={false} />);
+    await user.type(screen.getByLabelText("Your message"), "Make it 100 guests{Enter}");
+    expect([
+      (await screen.findByText(/Too many requests\./)).textContent,
+      screen.getByRole("button", { name: /send/i }),
+    ]).toEqual([
+      "Too many requests. You can send again in 30s.",
+      expect.objectContaining({ disabled: true }),
+    ]);
+  });
+
   it("saves_the_follow_up_suggestions_with_the_reply", async () => {
     requestRefine.mockResolvedValue({
       ok: true,

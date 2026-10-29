@@ -199,8 +199,8 @@ Every variable is server-only; none starts with `NEXT_PUBLIC_`, so nothing reach
 
 | Command                 | What it runs                                                                                                                                                                                     |
 | ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `npm test`              | Vitest: domain rules, AI adapters with a fake SDK client, route handlers with a fake planner, storage, `.ics`, theme contrast and React components                                               |
-| `npm run test:coverage` | The same, failing below 90% lines and branches for `src/domain` or 75% lines overall                                                                                                             |
+| `npm test`              | Vitest, 555 tests: domain rules, AI adapters with a fake SDK client, route handlers and request guards, security headers, storage, `.ics`, theme contrast, hooks and React components            |
+| `npm run test:coverage` | The same with coverage (99.9% lines, 97.4% branches, 100% functions), failing below 98% lines, 95% branches or 99% functions overall, or 99% lines for `src/domain`                              |
 | `npm run e2e`           | Playwright against a production build (`npm run build` first) in mock mode, with axe in light and dark themes on every page and tab                                                              |
 | `npm run eval:ai`       | Manual, costs about $1: six fixture briefs and a refine turn against the real API, checking schema, references, vegan menus and a prompt-injection attempt (`-- --quick` for one per event type) |
 | `scripts/presubmit.sh`  | The submission checks: public repo, one branch, size under 8 MB, no secrets, then every gate above                                                                                               |
@@ -214,11 +214,14 @@ every push to `main`.
 **Security** ([plan/09](plan/09-security.md)). The key lives only in server env and is redacted
 from logs and serialisation; `server-only` stops server modules from reaching the client bundle.
 Zod validates every boundary (form, API, storage, model output) with strict objects. AI routes
-have a 16 KB body cap checked on the stream, per-client and daily limits, and a response cache.
-A per-request nonce CSP (`script-src 'self' 'nonce-…' 'strict-dynamic'`, no `unsafe-eval` in
-production, `frame-ancestors 'none'`) plus `nosniff`, `Referrer-Policy`, `Permissions-Policy` and
-HSTS. No `dangerouslySetInnerHTML` (ESLint enforced). Logs carry counts and codes only, never the
-brief or chat text.
+accept only same-origin JSON (a `Sec-Fetch-Site` check plus a required JSON content type, which
+forces a CORS preflight), so another site cannot spend the quota through a visitor's browser.
+They also have a 16 KB body cap checked on the stream, per-client and daily limits, and a
+response cache. A per-request nonce CSP (`script-src 'self' 'nonce-…' 'strict-dynamic'`, no
+`unsafe-eval` in production, `frame-ancestors 'none'`) plus `nosniff`, `Referrer-Policy`,
+`Permissions-Policy`, cross-origin isolation (`COOP`, `CORP`) and HSTS with preload. No
+`dangerouslySetInnerHTML` (ESLint enforced). Logs carry counts and codes only, never the brief or
+chat text. `npm audit` reports no known vulnerabilities.
 
 **Accessibility** ([plan/08](plan/08-ui-ux-accessibility.md)). WCAG 2.1 AA: landmarks, a skip
 link, one `h1` per page, labels above every input, errors linked with `aria-describedby` and a
@@ -241,8 +244,8 @@ src/
   domain/              pure rules engine: brief schema, dates, budget, timeline, vendors, warnings
     reference/         base splits, milestone templates, vendor catalog, reference costs
   ai/                  PlannerAI port, Claude adapter (the only SDK import), mock adapter, prompts
-  server/              env, error envelope and body cap, rate limit, cache, logger, CSP, handlers
-  features/            intake, plan, refine (chat) and saved-plans UI
+  server/              env, request guards and body cap, rate limit, cache, logger, CSP and headers
+  features/            intake, plan, refine (chat), saved-plans and shared UI
   components/          layout pieces and the shadcn/ui primitives
   lib/                 browser storage, plan store, API client, .ics writer, formatting
   proxy.ts             per-request CSP nonce

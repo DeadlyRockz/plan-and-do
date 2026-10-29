@@ -20,9 +20,14 @@ export default defineConfig({
       provider: "v8",
       include: ["src/**/*.{ts,tsx}"],
       exclude: ["src/**/*.test.{ts,tsx}", "src/components/ui/**", "src/app/**/*.tsx"],
+      // Set just below the current figures, so any untested change fails CI. The domain's few
+      // missed branches are `?? 0n` fallbacks that only exist for noUncheckedIndexedAccess.
       thresholds: {
-        lines: 75,
-        "src/domain/**": { lines: 90, branches: 90 },
+        lines: 98,
+        statements: 98,
+        functions: 99,
+        branches: 95,
+        "src/domain/**": { lines: 99, branches: 90 },
       },
     },
   },

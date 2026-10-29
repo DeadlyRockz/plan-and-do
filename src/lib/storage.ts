@@ -3,6 +3,7 @@ import { EventBriefSchema } from "@/domain/brief";
 import { ChatTurnSchema, PlanIdeasSchema, SuggestionsSchema } from "@/domain/contracts";
 import { isIsoDate } from "@/domain/dates";
 
+// "occasio" was the working name. The key stays as it is so plans saved before the rename load.
 export const STORAGE_KEY = "occasio:plans:v1";
 export const MAX_SAVED_PLANS = 50;
 export const MAX_CHAT_TURNS = 20;
@@ -123,8 +124,8 @@ export class PlanRepository {
     this.memory = value;
   }
 
+  /** Callers run this only while still on the real store, so the notice is raised once. */
   private fallBackToMemory(): void {
-    if (this.usingMemory) return;
     this.usingMemory = true;
     this.pending.add("storage-unavailable");
   }

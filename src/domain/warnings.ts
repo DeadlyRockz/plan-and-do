@@ -3,9 +3,9 @@ import type { Budget } from "./budget";
 import { isPeakDay, type PlanContext } from "./context";
 import { addDays, dayOfWeek, type IsoDate } from "./dates";
 import { DIETARY_LABELS, EVENT_TYPE_LABELS } from "./event-types";
-import { formatDate, formatMoney, toMinorUnits } from "./money";
+import { formatDate, formatMoney, moneyFromMajor } from "./money";
 import { referenceCostBand } from "./reference/costs";
-import { joinWithAnd } from "./text";
+import { formatCount, joinWithAnd, lowerFirst, pluralize } from "./text";
 import type { Milestone } from "./timeline";
 import type { VendorItem } from "./vendors";
 
@@ -40,6 +40,8 @@ export type WarningInput = {
 
 const SEVERITY_ORDER: Record<WarningSeverity, number> = { critical: 0, warning: 1, info: 2 };
 const LARGE_EVENT_SAFETY_VENDORS = ["security", "first-aid", "permits", "insurance", "coordinator"];
+/** Lines a "trim this first" tip never names: the safety net and the context-driven modifiers. */
+const PROTECTED_BUDGET_LINES = ["contingency", "weather", "coordinator", "accessibility"];
 const DIETARY_SCALE_GUEST_THRESHOLD = 50;
 const WEEKDAY_NAMES = [
   "Sunday",
@@ -73,20 +75,15 @@ function budgetTight({ brief, context }: WarningInput): Warning | undefined {
   const band = referenceCostBand(brief.budget.currency, brief.eventType);
   if (context.budgetTier !== "tight" || !band) return undefined;
   const currency = brief.budget.currency;
-  const raiseTo = formatMoney({
-    minor: toMinorUnits(band.comfortable * brief.guestCount),
-    currency,
-  });
+  const raiseTo = formatMoney(moneyFromMajor(band.comfortable * brief.guestCount, currency));
   const affordableGuests = Math.floor(brief.budget.amount / band.comfortable);
   const cut =
-    affordableGuests >= 1
-      ? `, or cut the guest list to ${affordableGuests.toLocaleString("en-US")}`
-      : "";
+    affordableGuests >= 1 ? `, or cut the guest list to ${formatCount(affordableGuests)}` : "";
   return {
     id: "budget-tight",
     severity: "critical",
     title: "Your budget is tight for this event",
-    reason: `That's ${formatMoney(context.perGuest)} per guest. A ${eventNoun(brief)} usually needs at least ${formatMoney({ minor: toMinorUnits(band.tight), currency })} per guest.`,
+    reason: `That's ${formatMoney(context.perGuest)} per guest. A ${eventNoun(brief)} usually needs at least ${formatMoney(moneyFromMajor(band.tight, currency))} per guest.`,
     suggestion: `Raise the budget to about ${raiseTo}${cut}.`,
   };
 }
@@ -94,9 +91,7 @@ function budgetTight({ brief, context }: WarningInput): Warning | undefined {
 function budgetModerate({ brief, context, budget }: WarningInput): Warning | undefined {
   if (context.budgetTier !== "moderate") return undefined;
   const largestDonor = budget.lines.find(
-    (line) =>
-      line.priorityRank === undefined &&
-      !["contingency", "weather", "coordinator", "accessibility"].includes(line.id),
+    (line) => line.priorityRank === undefined && !PROTECTED_BUDGET_LINES.includes(line.id),
   );
   const trim = largestDonor
     ? ` trim ${largestDonor.label.toLowerCase()} first`
@@ -140,7 +135,7 @@ function timelineCompressed({ brief, context, milestones }: WarningInput): Warni
     severity: "warning",
     title: "Less time than usual",
     reason: `Your ${eventNoun(brief)} is ${days(context.leadTimeDays)} away. This kind of event usually gets about ${days(context.idealLeadDays)} of planning.`,
-    suggestion: `${count(squeezed.length, "step was", "steps were")} squeezed into the time left.${focus}`,
+    suggestion: `${pluralize(squeezed.length, "step was", "steps were")} squeezed into the time left.${focus}`,
   };
 }
 
@@ -155,7 +150,7 @@ function timelineUrgent({ brief, context, milestones }: WarningInput): Warning |
     severity: "critical",
     title: "Very little time left",
     reason: `Your ${eventNoun(brief)} ${when}, under the ${days(context.criticalLeadDays)} it usually needs at minimum.`,
-    suggestion: `Focus on the ${count(critical, "critical step", "critical steps")}. ${count(optional, "optional one is", "optional ones are")} under “If time allows”.`,
+    suggestion: `Focus on the ${pluralize(critical, "critical step", "critical steps")}. ${pluralize(optional, "optional one is", "optional ones are")} under “If time allows”.`,
   };
 }
 
@@ -187,7 +182,7 @@ function largeEvent({ brief, context, vendors }: WarningInput): Warning | undefi
     id: "large-event",
     severity: "warning",
     title: "A large crowd needs extra planning",
-    reason: `${brief.guestCount.toLocaleString("en-US")} guests is a ${context.sizeClass === "very-large" ? "very large" : "large"} event.`,
+    reason: `${formatCount(brief.guestCount)} guests is a ${context.sizeClass === "very-large" ? "very large" : "large"} event.`,
     suggestion: `Plan entrances, crowd flow and toilets early.${checklist}`,
   };
 }
@@ -200,7 +195,7 @@ function dietaryScale({ brief }: WarningInput): Warning | undefined {
     id: "dietary-scale",
     severity: "info",
     title: "Track dietary needs at scale",
-    reason: `With ${brief.guestCount.toLocaleString("en-US")} guests and ${needs} needs, mix-ups are easy.`,
+    reason: `With ${formatCount(brief.guestCount)} guests and ${needs} needs, mix-ups are easy.`,
     suggestion:
       "Ask the caterer to label every dish, and add a dietary question to your RSVP so you know the count for each need.",
   };
@@ -222,13 +217,5 @@ function eventNoun(brief: EventBrief): string {
 }
 
 function days(value: number): string {
-  return count(value, "day", "days");
-}
-
-function count(value: number, singular: string, plural: string): string {
-  return `${value.toLocaleString("en-US")} ${value === 1 ? singular : plural}`;
-}
-
-function lowerFirst(text: string): string {
-  return text.charAt(0).toLowerCase() + text.slice(1);
+  return pluralize(value, "day", "days");
 }

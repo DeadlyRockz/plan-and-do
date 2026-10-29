@@ -8,24 +8,16 @@ import {
   UsersIcon,
   WalletIcon,
 } from "@phosphor-icons/react/ssr";
+import type { Icon } from "@phosphor-icons/react";
+import type { ReactNode } from "react";
 import type { EventBrief } from "@/domain/brief";
 import type { PlanContext } from "@/domain/context";
 import type { IsoDate } from "@/domain/dates";
 import { EVENT_TYPE_LABELS } from "@/domain/event-types";
-import { formatMoney } from "@/domain/money";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { formatCountdown, formatDate } from "@/lib/format";
+import { formatCount, formatCountdown, formatDate, formatMoney, moneyFromMajor } from "@/lib/format";
+import { DeletePlanDialog } from "@/features/shared/delete-plan";
 import { EVENT_TYPE_ICONS } from "@/features/shared/event-meta";
 import { MODE_STATUS, StatusBadge } from "@/features/shared/status-badges";
 import { TYPE } from "@/components/styles";
@@ -56,10 +48,10 @@ export function PlanHeader({ title, brief, context, today, onDelete }: PlanHeade
           <span className="text-muted-foreground"> ({formatCountdown(today, brief.eventDate)})</span>
         </Fact>
         <Fact icon={UsersIcon} label="Guests">
-          {brief.guestCount.toLocaleString("en-US")} guests
+          {formatCount(brief.guestCount)} guests
         </Fact>
         <Fact icon={WalletIcon} label="Budget">
-          {formatMoney({ minor: Math.round(brief.budget.amount * 100), currency: brief.budget.currency })}
+          {formatMoney(moneyFromMajor(brief.budget.amount, brief.budget.currency))}
         </Fact>
         {brief.location && (
           <Fact icon={MapPinIcon} label="Location">
@@ -72,24 +64,12 @@ export function PlanHeader({ title, brief, context, today, onDelete }: PlanHeade
           <PrinterIcon size={18} aria-hidden="true" />
           Print or save PDF
         </Button>
-        <AlertDialog>
-          <AlertDialogTrigger asChild>
-            <Button variant="ghost">
-              <TrashIcon size={18} aria-hidden="true" />
-              Delete plan
-            </Button>
-          </AlertDialogTrigger>
-          <AlertDialogContent>
-            <AlertDialogTitle>Delete this plan?</AlertDialogTitle>
-            <AlertDialogDescription>
-              It will be removed from this browser. You can undo for a few seconds afterwards.
-            </AlertDialogDescription>
-            <AlertDialogFooter>
-              <AlertDialogCancel>Keep it</AlertDialogCancel>
-              <AlertDialogAction onClick={onDelete}>Delete plan</AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
+        <DeletePlanDialog planTitle={title} onConfirm={onDelete}>
+          <Button variant="ghost">
+            <TrashIcon size={18} aria-hidden="true" />
+            Delete plan
+          </Button>
+        </DeletePlanDialog>
       </div>
     </header>
   );
@@ -100,9 +80,9 @@ function Fact({
   label,
   children,
 }: {
-  icon: typeof CalendarBlankIcon;
+  icon: Icon;
   label: string;
-  children: React.ReactNode;
+  children: ReactNode;
 }) {
   return (
     <div className="flex items-center gap-2">

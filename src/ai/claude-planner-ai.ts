@@ -2,6 +2,7 @@ import "server-only";
 import Anthropic from "@anthropic-ai/sdk";
 import { betaZodOutputFormat, betaZodTool } from "@anthropic-ai/sdk/helpers/beta/zod";
 import type { EventBrief } from "@/domain/brief";
+import { PlanIdeasSchema } from "@/domain/contracts";
 import { applyBriefPatch } from "./brief-patch";
 import {
   PlannerAIError,
@@ -19,7 +20,6 @@ import {
   REFINE_SYSTEM_PROMPT,
 } from "./prompts";
 import { dropUnknownReferences } from "./references";
-import { PlanIdeasSchema } from "@/domain/contracts";
 import { BriefPatchSchema, RefineReplySchema, type RefineReply } from "./schemas";
 import { cleanSuggestions } from "./suggestions";
 
@@ -34,6 +34,8 @@ const MAX_RETRIES = 2;
 const UPDATE_BRIEF_DESCRIPTION =
   "Update the user's event brief when they state a change to the event's facts. Send the changed fields and null for every field that did not change. Returns the recalculated budget, timeline mode and warnings, or an error explaining why the change is invalid.";
 
+// Built once: each converts a Zod schema to the JSON schema the API is sent.
+const IDEAS_FORMAT = betaZodOutputFormat(PlanIdeasSchema);
 const REFINE_REPLY_FORMAT = betaZodOutputFormat(RefineReplySchema);
 
 /** Builds the adapter with a real SDK client. The key never leaves the server. */
@@ -65,7 +67,7 @@ export class ClaudePlannerAI implements PlannerAI {
         fallbacks: "default",
         system: [{ type: "text", text: IDEAS_SYSTEM_PROMPT, cache_control: { type: "ephemeral" } }],
         messages: [{ role: "user", content: buildIdeasUserMessage(brief, skeleton) }],
-        output_config: { effort: "medium", format: betaZodOutputFormat(PlanIdeasSchema) },
+        output_config: { effort: "medium", format: IDEAS_FORMAT },
       }),
     );
     assertUsableStopReason(response.stop_reason);

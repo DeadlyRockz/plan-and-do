@@ -2,8 +2,10 @@ import { describe, expect, it } from "vitest";
 import { buildPlan } from "../build-plan";
 import type { EventBrief } from "../brief";
 import { addDays } from "../dates";
-import { EVENT_TYPES, SETTINGS, SUBTYPES } from "../event-types";
+import { EVENT_TYPES, SETTINGS, SUBTYPES, type Subtype } from "../event-types";
 import { VENDOR_CATALOG } from "../reference/vendors";
+import type { Milestone } from "../timeline";
+import { buildVendorChecklist } from "../vendors";
 import { makeBrief, TODAY } from "./fixtures";
 
 const vendorIds = (brief: EventBrief) => buildPlan(brief, TODAY).vendors.map((vendor) => vendor.id);
@@ -26,7 +28,7 @@ describe("buildVendorChecklist", () => {
   });
 
   it("includes_kids_entertainer_only_for_child_birthdays", () => {
-    const has = (subtype: string) =>
+    const has = (subtype: Subtype) =>
       vendorIds(makeBrief("birthday", { subtype })).includes("kids-entertainer");
     expect(SUBTYPES.birthday.map(has)).toEqual([true, false, false, false]);
   });
@@ -104,6 +106,37 @@ describe("buildVendorChecklist", () => {
     expect(vendor(makeBrief("community", { servesAlcohol: true }), "permits")?.why).toContain(
       "liquor licence",
     );
+  });
+
+  it("asks_the_stationer_about_recycled_paper_only_for_sustainable_events", () => {
+    const asks = (sustainability: boolean) =>
+      vendor(makeBrief("wedding", { sustainability }), "stationery")?.questions.includes(
+        "Can you print on recycled paper, or go fully digital?",
+      );
+    expect([asks(true), asks(false)]).toEqual([true, false]);
+  });
+
+  it("returns_no_vendors_when_there_are_no_milestones", () => {
+    expect(buildVendorChecklist(makeBrief("wedding"), [])).toEqual([]);
+  });
+
+  it("books_by_the_first_milestone_when_the_linked_one_is_missing", () => {
+    const kickoff: Milestone = {
+      id: "kickoff",
+      title: "Kick off",
+      due: "2026-11-01",
+      daysBefore: 400,
+      critical: true,
+      compressed: false,
+      optional: false,
+      isPostEvent: false,
+    };
+    const later: Milestone = { ...kickoff, id: "later", due: "2027-01-01", daysBefore: 300 };
+    const vendors = buildVendorChecklist(makeBrief("wedding"), [kickoff, later]);
+    expect([
+      vendors.length > 0,
+      vendors.every((item) => item.bookByMilestoneId === "kickoff" && item.bookBy === "2026-11-01"),
+    ]).toEqual([true, true]);
   });
 
   it("sorts_vendors_by_book_by_date", () => {

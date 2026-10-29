@@ -2,28 +2,25 @@
 
 import { PaperPlaneTiltIcon } from "@phosphor-icons/react/ssr";
 import { cn } from "cn";
-import { useEffect, useId, useRef, useState, type FormEvent, type KeyboardEvent } from "react";
-import { toast } from "sonner";
-import { MAX_HISTORY_TURNS, MAX_MESSAGE_CHARACTERS, MAX_TURN_CHARACTERS } from "@/domain/contracts";
+import { useEffect, useId, useRef, type FormEvent, type KeyboardEvent } from "react";
+import { MAX_MESSAGE_CHARACTERS } from "@/domain/contracts";
 import type { IsoDate } from "@/domain/dates";
 import { exampleChanges } from "@/domain/suggestions";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { requestRefine } from "@/lib/api-client";
-import { planStore } from "@/lib/plan-store";
-import { MAX_CHAT_TURNS, type SavedPlan } from "@/lib/storage";
-import { FieldError } from "@/features/intake/field";
-import { announceStorageNotices } from "@/features/shared/storage-notices";
-import { retryAtFrom, useCountdown } from "@/features/shared/use-countdown";
+import type { SavedPlan } from "@/lib/storage";
+import { FieldError } from "@/features/shared/field-error";
 import { TYPE } from "@/components/styles";
+import { useRefineChat } from "./use-refine-chat";
 
-type Failure = { message: string; retryAt?: number };
+/** The last "Try asking" starter, after two example changes that demo mode can apply. */
+const GENERAL_STARTER = "What should I book first?";
 
 /**
- * "Ask the planner" (plan/06 §6.5). Each turn sends the brief, the last 10 text-only turns and the
- * new message. If the assistant changes the brief, the plan is rebuilt from today and the ideas
- * are marked out of date until refreshed. Each reply comes with follow-ups the user can tap.
+ * "Ask the planner" (plan/06 §6.5): the conversation, tappable follow-ups and the message box.
+ * `useRefineChat` sends each turn; if the brief changes, the plan is rebuilt and the ideas are
+ * marked out of date until refreshed.
  */
 export function ChatPanel({
   plan,
@@ -36,55 +33,17 @@ export function ChatPanel({
   disabled: boolean;
   className?: string;
 }) {
-  const [draft, setDraft] = useState("");
-  const [pending, setPending] = useState<string | null>(null);
-  const [failure, setFailure] = useState<Failure | null>(null);
-  const [announcement, setAnnouncement] = useState("");
+  const { draft, setDraft, pending, failure, secondsLeft, announcement, send } = useRefineChat(
+    plan,
+    today,
+  );
   const logRef = useRef<HTMLOListElement>(null);
-  const secondsLeft = useCountdown(failure?.retryAt);
   const turns = plan.chat;
 
   useEffect(() => {
     // Keep the newest message in view.
     logRef.current?.scrollTo({ top: logRef.current.scrollHeight });
   }, [turns.length, pending]);
-
-  const send = async (text: string) => {
-    const message = text.trim().slice(0, MAX_MESSAGE_CHARACTERS);
-    if (!message || pending) return;
-    setPending(message);
-    setFailure(null);
-    setDraft("");
-    const result = await requestRefine({
-      brief: plan.brief,
-      today,
-      history: turns.slice(-MAX_HISTORY_TURNS),
-      message,
-    });
-    setPending(null);
-    if (!result.ok) {
-      setDraft(message);
-      setFailure({ message: result.message, retryAt: retryAtFrom(result.retryAfterSeconds) });
-      return;
-    }
-    planStore.update(plan.id, (current) => ({
-      ...current,
-      ...(result.briefChanged && { brief: result.brief, plannedOn: today }),
-      chatSuggestions: result.suggestions,
-      chat: [
-        ...current.chat,
-        { role: "user" as const, text: message },
-        { role: "assistant" as const, text: result.reply.slice(0, MAX_TURN_CHARACTERS) },
-      ].slice(-MAX_CHAT_TURNS),
-    }));
-    announceStorageNotices();
-    setAnnouncement(`Planner: ${result.reply}`);
-    if (result.briefChanged) {
-      toast.success("Plan updated", {
-        description: "The budget, timeline and checklist now reflect your change.",
-      });
-    }
-  };
 
   const onSubmit = (event: FormEvent) => {
     event.preventDefault();
@@ -98,7 +57,7 @@ export function ChatPanel({
     }
   };
 
-  const starters = [...exampleChanges(plan.brief).slice(0, 2), "What should I book first?"];
+  const starters = [...exampleChanges(plan.brief).slice(0, 2), GENERAL_STARTER];
   const followUps = plan.chatSuggestions ?? [];
   const pick = (suggestion: string) => void send(suggestion);
 

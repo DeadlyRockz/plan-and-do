@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { buildPlan } from "../build-plan";
-import { formatDate, formatMoney, formatShare } from "../money";
+import { formatDate, formatMoney, formatShare, moneyFromMajor } from "../money";
 import { EVENT_TYPES } from "../event-types";
 import { makeBrief, TODAY } from "./fixtures";
 
@@ -52,6 +52,42 @@ describe("formatting", () => {
 
   it("shows_minor_units_only_when_present", () => {
     expect(formatMoney({ minor: 123_450, currency: "USD" })).toBe("$1,234.50");
+  });
+
+  it("formats_correctly_when_currencies_and_fraction_digits_alternate", () => {
+    // Formatters are cached per currency and fraction digits; reuse must not leak between keys.
+    const amounts = [
+      { minor: 120_000_000, currency: "INR" },
+      { minor: 123_450, currency: "INR" },
+      { minor: 10_000, currency: "USD" },
+      { minor: 120_000_000, currency: "INR" },
+      { minor: 123_450, currency: "USD" },
+      { minor: 500, currency: "GBP" },
+      { minor: 150, currency: "EUR" },
+      { minor: 123_450, currency: "INR" },
+    ] as const;
+    expect(amounts.map(formatMoney)).toEqual([
+      "₹12,00,000",
+      "₹1,234.50",
+      "$100",
+      "₹12,00,000",
+      "$1,234.50",
+      "£5",
+      "€1.50",
+      "₹1,234.50",
+    ]);
+  });
+
+  it("converts_major_amounts_to_whole_minor_units", () => {
+    expect([
+      moneyFromMajor(1234.5, "INR"),
+      moneyFromMajor(0.1 + 0.2, "USD"),
+      moneyFromMajor(999_999_999.99, "GBP"),
+    ]).toEqual([
+      { minor: 123_450, currency: "INR" },
+      { minor: 30, currency: "USD" },
+      { minor: 99_999_999_999, currency: "GBP" },
+    ]);
   });
 
   it("formats_dates_as_weekday_day_month_year", () => {

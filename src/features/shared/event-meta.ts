@@ -1,12 +1,7 @@
 import { CakeIcon, HeartIcon, UsersThreeIcon } from "@phosphor-icons/react/ssr";
 import type { Icon } from "@phosphor-icons/react";
 import type { EventBrief } from "@/domain/brief";
-import {
-  EVENT_TYPE_LABELS,
-  SUBTYPE_LABELS,
-  type EventType,
-  type Subtype,
-} from "@/domain/event-types";
+import { SUBTYPE_LABELS, type EventType } from "@/domain/event-types";
 
 export const EVENT_TYPE_ICONS: Record<EventType, Icon> = {
   wedding: HeartIcon,
@@ -23,6 +18,6 @@ export const EVENT_TYPE_DESCRIPTIONS: Record<EventType, string> = {
 /** The plan's display name: the user's own, or one built from the event type. */
 export function eventTitle(brief: EventBrief): string {
   if (brief.eventName) return brief.eventName;
-  const subtype = SUBTYPE_LABELS[brief.subtype as Subtype] ?? EVENT_TYPE_LABELS[brief.eventType];
+  const subtype = SUBTYPE_LABELS[brief.subtype];
   return brief.eventType === "wedding" ? `${subtype} wedding` : subtype;
 }

@@ -203,6 +203,23 @@ describe("allocateBudget", () => {
     );
     expect(sumOf(budget)).toBe(1);
   });
+
+  it("handles_the_smallest_possible_budget_outdoors_when_the_venue_holds_nothing", () => {
+    const budget = allocateBudget(
+      makeBrief("birthday", { budget: { amount: 0.01, currency: "GBP" }, setting: "outdoor" }),
+    );
+    expect([sumOf(budget), byId(budget).venue, byId(budget).weather]).toEqual([1, 0, 0]);
+  });
+
+  it("gives_every_line_a_zero_share_instead_of_dividing_by_a_zero_total", () => {
+    // The schema rejects a zero budget; the engine still must not divide by zero if handed one.
+    const brief = { ...makeBrief("wedding"), budget: { amount: 0, currency: "INR" as const } };
+    const budget = allocateBudget(brief);
+    expect([
+      budget.total.minor,
+      budget.lines.every((line) => line.basisPoints === 0 && line.amount.minor === 0),
+    ]).toEqual([0, true]);
+  });
 });
 
 describe("splitProportionally", () => {

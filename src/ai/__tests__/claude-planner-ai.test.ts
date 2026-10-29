@@ -1,6 +1,6 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { describe, expect, it, vi } from "vitest";
-import { ClaudePlannerAI } from "../claude-planner-ai";
+import { ClaudePlannerAI, createClaudePlannerAI } from "../claude-planner-ai";
 import { PlannerAIError } from "../planner-ai";
 import { IDEAS_SYSTEM_PROMPT } from "../prompts";
 import type { BriefPatch } from "../schemas";
@@ -38,6 +38,17 @@ async function errorCode(promise: Promise<unknown>): Promise<string> {
     return error instanceof PlannerAIError ? `${error.code}:${error.detail}` : "other";
   }
 }
+
+describe("createClaudePlannerAI", () => {
+  it("builds_the_adapter_for_the_given_model_without_calling_the_api", () => {
+    const adapter = createClaudePlannerAI("placeholder-key-for-tests", "claude-test-model");
+    expect([adapter instanceof ClaudePlannerAI, adapter.adapter, adapter.model]).toEqual([
+      true,
+      "claude",
+      "claude-test-model",
+    ]);
+  });
+});
 
 describe("ClaudePlannerAI.generateIdeas", () => {
   it("returns_parsed_ideas_for_valid_model_output", async () => {
@@ -142,6 +153,53 @@ describe("ClaudePlannerAI.generateIdeas", () => {
       "default",
       ["server-side-fallback-2026-07-01"],
     ]);
+  });
+
+  it("maps_a_finished_turn_without_parsed_output_to_ai_unavailable", async () => {
+    const adapter = adapterWith({ parse: async () => parsedResponse({ parsed_output: null }) });
+    expect(await errorCode(adapter.generateIdeas(request))).toBe(
+      "AI_UNAVAILABLE:unparseable_output",
+    );
+  });
+
+  it("maps_a_connection_failure_to_ai_unavailable", async () => {
+    const adapter = adapterWith({
+      parse: () => Promise.reject(new Anthropic.APIConnectionError({ message: "offline" })),
+    });
+    expect(await errorCode(adapter.generateIdeas(request))).toBe("AI_UNAVAILABLE:connection");
+  });
+
+  it("maps_an_api_error_without_a_status_to_ai_unavailable", async () => {
+    const adapter = adapterWith({
+      parse: () =>
+        Promise.reject(new Anthropic.APIError(undefined, undefined, "no status", undefined)),
+    });
+    expect(await errorCode(adapter.generateIdeas(request))).toBe(
+      "AI_UNAVAILABLE:api_status_unknown",
+    );
+  });
+
+  it("maps_a_thrown_non_error_value_to_ai_unavailable", async () => {
+    const adapter = adapterWith({ parse: () => Promise.reject("a thrown string") });
+    expect(await errorCode(adapter.generateIdeas(request))).toBe("AI_UNAVAILABLE:unknown");
+  });
+
+  it("passes_a_planner_error_through_unchanged", async () => {
+    const adapter = adapterWith({
+      parse: () => Promise.reject(new PlannerAIError("AI_DECLINED", "refusal")),
+    });
+    expect(await errorCode(adapter.generateIdeas(request))).toBe("AI_DECLINED:refusal");
+  });
+
+  it("counts_a_missing_cache_read_figure_as_zero", async () => {
+    const adapter = adapterWith({
+      parse: async () =>
+        parsedResponse({
+          usage: { input_tokens: 10, output_tokens: 20, cache_read_input_tokens: null },
+        }),
+    });
+    const { usage: reported } = await adapter.generateIdeas(request);
+    expect([reported.cacheReadTokens, reported.stopReason]).toEqual([0, "end_turn"]);
   });
 
   it("reports_token_usage_including_cache_reads", async () => {
@@ -317,6 +375,80 @@ describe("ClaudePlannerAI.refine", () => {
     };
     expect([params.output_config.format.type, params.output_config.format.schema.required]).toEqual(
       ["json_schema", ["reply", "suggestions"]],
+    );
+  });
+
+  it("sends_earlier_turns_before_the_new_message_wrapped_in_tags", async () => {
+    const toolRunner = vi.fn<RunnerFn>(async function* () {
+      yield replyMessage("Done.");
+    });
+    const history = [
+      { role: "user" as const, text: "Hi" },
+      { role: "assistant" as const, text: "Hello! How can I help?" },
+    ];
+    await adapterWith({ toolRunner }).refine({ ...refineRequest, history });
+    const params = toolRunner.mock.calls[0]?.[0] as unknown as {
+      messages: { role: string; content: string }[];
+    };
+    expect([
+      params.messages.slice(0, 2),
+      params.messages[2]?.role,
+      params.messages[2]?.content.endsWith("<user_message>We're now 80 guests</user_message>"),
+    ]).toEqual([
+      [
+        { role: "user", content: "Hi" },
+        { role: "assistant", content: "Hello! How can I help?" },
+      ],
+      "user",
+      true,
+    ]);
+  });
+
+  it("asks_the_user_to_rephrase_when_nothing_changed_and_the_answer_is_not_json", async () => {
+    const toolRunner: RunnerFn = async function* () {
+      yield textMessage("Sure, sounds good.");
+    };
+    const result = await adapterWith({ toolRunner }).refine(refineRequest);
+    expect([result.briefChanged, result.brief, result.reply, result.suggestions]).toEqual([
+      false,
+      brief,
+      "I couldn't work that out. Could you say it another way?",
+      [],
+    ]);
+  });
+
+  it("falls_back_safely_when_the_loop_yields_no_turns", async () => {
+    const toolRunner: RunnerFn = async function* () {};
+    const result = await adapterWith({ toolRunner }).refine(refineRequest);
+    expect([result.reply, result.briefChanged, result.usage]).toEqual([
+      "I couldn't work that out. Could you say it another way?",
+      false,
+      {
+        inputTokens: 0,
+        outputTokens: 0,
+        cacheReadTokens: 0,
+        stopReason: null,
+        droppedReferences: 0,
+      },
+    ]);
+  });
+
+  it("maps_an_sdk_failure_inside_the_loop_to_ai_unavailable", async () => {
+    const toolRunner: RunnerFn = async function* () {
+      yield { stop_reason: "tool_use", usage: usage(), content: [] };
+      throw new Anthropic.RateLimitError(429, {}, "slow down", new Headers());
+    };
+    expect(await errorCode(adapterWith({ toolRunner }).refine(refineRequest))).toBe(
+      "AI_UNAVAILABLE:upstream_rate_limited",
+    );
+  });
+
+  it("maps_max_tokens_on_the_final_refine_turn_to_ai_unavailable", async () => {
+    const toolRunner: RunnerFn = async function* () {
+      yield textMessage('{"reply": "Half an ans', "max_tokens");
+    };
+    expect(await errorCode(adapterWith({ toolRunner }).refine(refineRequest))).toBe(
+      "AI_UNAVAILABLE:max_tokens",
     );
   });
 

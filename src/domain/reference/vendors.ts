@@ -6,7 +6,7 @@ import {
   type AccessibilityNeed,
   type DietaryNeed,
 } from "../event-types";
-import { joinWithAnd } from "../text";
+import { formatCount, joinWithAnd } from "../text";
 import type { BudgetLineId } from "./budget-lines";
 
 export const VENDOR_IDS = [
@@ -49,7 +49,7 @@ export type VendorRule = {
 };
 
 const MAX_QUESTIONS = 5;
-const guests = (brief: EventBrief) => brief.guestCount.toLocaleString("en-US");
+const guests = (brief: EventBrief) => formatCount(brief.guestCount);
 const isType = (brief: EventBrief, ...types: EventBrief["eventType"][]) =>
   types.includes(brief.eventType);
 const byType = <T>(brief: EventBrief, values: Record<EventBrief["eventType"], T>): T =>

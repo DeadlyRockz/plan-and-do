@@ -1,6 +1,6 @@
-import { WarningCircleIcon } from "@phosphor-icons/react/ssr";
 import type { ReactNode } from "react";
 import { Label } from "@/components/ui/label";
+import { FieldError } from "@/features/shared/field-error";
 import { fieldId, type FieldName } from "./form-model";
 
 export type ControlProps = {
@@ -40,15 +40,6 @@ export function Field({ field, label, hint, error, optional, children }: FieldPr
       })}
       {error && <FieldError id={`${id}-error`}>{error}</FieldError>}
     </div>
-  );
-}
-
-export function FieldError({ id, children }: { id: string; children: ReactNode }) {
-  return (
-    <p id={id} className="flex items-start gap-2 text-sm font-medium text-destructive">
-      <WarningCircleIcon size={18} weight="bold" aria-hidden="true" className="mt-px shrink-0" />
-      {children}
-    </p>
   );
 }
 

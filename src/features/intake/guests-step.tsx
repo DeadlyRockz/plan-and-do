@@ -2,7 +2,8 @@
 
 import { Input } from "@/components/ui/input";
 import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select";
-import { CURRENCIES, type Currency } from "@/domain/money";
+import { CURRENCIES } from "@/domain/money";
+import { isOneOf } from "@/domain/text";
 import { RadioRow } from "./choice-list";
 import { Field, FieldGroup } from "./field";
 import type { StepProps } from "./step-props";
@@ -77,7 +78,9 @@ export function GuestsStep({ values, errors, set }: StepProps) {
             <NativeSelect
               {...control}
               value={values.currency}
-              onChange={(event) => set("currency", event.target.value as Currency)}
+              onChange={(event) => {
+                if (isOneOf(CURRENCIES, event.target.value)) set("currency", event.target.value);
+              }}
             >
               {CURRENCIES.map((currency) => (
                 <NativeSelectOption key={currency} value={currency}>

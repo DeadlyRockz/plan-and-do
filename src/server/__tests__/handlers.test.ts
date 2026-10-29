@@ -78,6 +78,18 @@ describe("POST /api/ai/ideas", () => {
     ]);
   });
 
+  it("ideas_rejects_unknown_top_level_fields_before_calling_the_planner", async () => {
+    const deps = makeDeps();
+    const response = await createIdeasHandler(deps)(post({ ...validIdeasBody, model: "other" }));
+    const body = await response.json();
+    expect([
+      response.status,
+      body.error.code,
+      Object.keys(body.error.fields),
+      vi.mocked(deps.planner.generateIdeas).mock.calls.length,
+    ]).toEqual([400, "VALIDATION_ERROR", ["_"], 0]);
+  });
+
   it("ideas_returns_413_for_body_over_16kb", async () => {
     const response = await createIdeasHandler(makeDeps())(post({ padding: "x".repeat(17_000) }));
     expect(response.status).toBe(413);
@@ -88,6 +100,38 @@ describe("POST /api/ai/ideas", () => {
       post({ padding: "x".repeat(17_000) }, { "content-length": "10" }),
     );
     expect(response.status).toBe(413);
+  });
+
+  it("rejects_a_cross_site_request_with_403_before_calling_the_planner", async () => {
+    const deps = makeDeps();
+    const response = await createIdeasHandler(deps)(
+      post(validIdeasBody, { "sec-fetch-site": "cross-site" }),
+    );
+    expect([
+      response.status,
+      (await response.json()).error.code,
+      vi.mocked(deps.planner.generateIdeas).mock.calls.length,
+    ]).toEqual([403, "FORBIDDEN", 0]);
+  });
+
+  it("rejects_a_text_plain_body_that_would_skip_the_cors_preflight", async () => {
+    const response = await createIdeasHandler(makeDeps())(
+      post(validIdeasBody, { "content-type": "text/plain" }),
+    );
+    expect([response.status, (await response.json()).error.code]).toEqual([
+      415,
+      "UNSUPPORTED_MEDIA_TYPE",
+    ]);
+  });
+
+  it("accepts_a_same_origin_json_request_with_a_charset_parameter", async () => {
+    const response = await createIdeasHandler(makeDeps())(
+      post(validIdeasBody, {
+        "content-type": "application/json; charset=utf-8",
+        "sec-fetch-site": "same-origin",
+      }),
+    );
+    expect(response.status).toBe(200);
   });
 
   it("ideas_returns_429_with_retry_after_when_rate_limited", async () => {
@@ -199,6 +243,14 @@ describe("POST /api/ai/refine", () => {
       400,
       { history: "Send at most 10 earlier messages." },
     ]);
+  });
+
+  it("refine_rejects_a_same_site_request_from_another_subdomain", async () => {
+    const deps = makeDeps();
+    const response = await createRefineHandler(deps)(
+      post(validRefineBody, { "sec-fetch-site": "same-site" }),
+    );
+    expect([response.status, vi.mocked(deps.planner.refine).mock.calls.length]).toEqual([403, 0]);
   });
 
   it("rejects_messages_over_500_characters", async () => {

@@ -1,6 +1,8 @@
 import { daysBetween, type IsoDate } from "@/domain/dates";
+import { formatCount } from "@/domain/text";
 
-export { formatDate, formatMoney, formatShare } from "@/domain/money";
+export { formatDate, formatMoney, formatShare, moneyFromMajor } from "@/domain/money";
+export { formatCount } from "@/domain/text";
 
 /** "today", "tomorrow", "in 136 days", "3 days ago". */
 export function formatCountdown(today: IsoDate, eventDate: IsoDate): string {
@@ -8,7 +10,7 @@ export function formatCountdown(today: IsoDate, eventDate: IsoDate): string {
   if (days === 0) return "today";
   if (days === 1) return "tomorrow";
   if (days === -1) return "yesterday";
-  const count = Math.abs(days).toLocaleString("en-US");
+  const count = formatCount(Math.abs(days));
   return days > 0 ? `in ${count} days` : `${count} days ago`;
 }
 
