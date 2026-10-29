@@ -1,0 +1,77 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      # E2E and every other check run without a key (plan/06 §6.8).
+      PLANNER_AI_MODE: mock
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - name: Install
+        run: npm ci
+
+      - name: Lint and format check
+        run: npm run lint
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Unit, component and integration tests (with coverage thresholds)
+        run: npm run test:coverage
+
+      - name: Build
+        run: npm run build
+
+      - name: E2E and accessibility (mock AI mode)
+        run: |
+          npx playwright install --with-deps chromium
+          npm run e2e
+
+      - name: Dependency audit
+        run: npm audit --audit-level=high
+
+      - name: Secret scan (tracked tree and full history)
+        run: |
+          if git grep -nE "sk-ant-[A-Za-z0-9_-]{10,}" -- . ':!*.md'; then
+            echo "A Claude API key pattern is committed. Rotate the key immediately." && exit 1
+          fi
+          if git log -p --all | grep -nE "sk-ant-[A-Za-z0-9_-]{10,}"; then
+            echo "A Claude API key pattern is in git history. Rotate the key immediately." && exit 1
+          fi
+
+      - name: Repository size guard (fail above 8 MB, the limit is 10 MB)
+        run: |
+          git gc --quiet
+          size_kib=$(git count-objects -v | awk '/size-pack/ {print $2}')
+          echo "size-pack: ${size_kib} KiB"
+          test "$size_kib" -le 8192
+
+      - name: Upload Playwright report on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report
+          retention-days: 7
