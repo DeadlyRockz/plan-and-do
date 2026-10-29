@@ -199,15 +199,15 @@ Every variable is server-only; none starts with `NEXT_PUBLIC_`, so nothing reach
 
 | Command                 | What it runs                                                                                                                                                                                     |
 | ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `npm test`              | Vitest, 555 tests: domain rules, AI adapters with a fake SDK client, route handlers and request guards, security headers, storage, `.ics`, theme contrast, hooks and React components            |
+| `npm test`              | Vitest, 562 tests: domain rules, AI adapters with a fake SDK client, route handlers and request guards, security headers, storage, `.ics`, theme contrast, hooks and React components            |
 | `npm run test:coverage` | The same with coverage (99.9% lines, 97.4% branches, 100% functions), failing below 98% lines, 95% branches or 99% functions overall, or 99% lines for `src/domain`                              |
-| `npm run e2e`           | Playwright against a production build (`npm run build` first) in mock mode, with axe in light and dark themes on every page and tab                                                              |
+| `npm run e2e`           | Playwright against a production build (`npm run build` first) in mock mode: axe in light and dark themes on every page and tab, and a walk through the app that fails on any CSP violation       |
 | `npm run eval:ai`       | Manual, costs about $1: six fixture briefs and a refine turn against the real API, checking schema, references, vegan menus and a prompt-injection attempt (`-- --quick` for one per event type) |
 | `scripts/presubmit.sh`  | The submission checks: public repo, one branch, size under 8 MB, no secrets, then every gate above                                                                                               |
 
 CI (`.github/workflows/ci.yml`) runs lint, typecheck, coverage-gated tests, build, E2E, `npm
 audit --audit-level=high`, a secret scan of the tree and history, and a repository-size guard on
-every push to `main`.
+every push to `main`; `.github/workflows/codeql.yml` adds CodeQL security analysis.
 
 ## 9. Security, accessibility and efficiency
 
@@ -217,11 +217,13 @@ Zod validates every boundary (form, API, storage, model output) with strict obje
 accept only same-origin JSON (a `Sec-Fetch-Site` check plus a required JSON content type, which
 forces a CORS preflight), so another site cannot spend the quota through a visitor's browser.
 They also have a 16 KB body cap checked on the stream, per-client and daily limits, and a
-response cache. A per-request nonce CSP (`script-src 'self' 'nonce-…' 'strict-dynamic'`, no
-`unsafe-eval` in production, `frame-ancestors 'none'`) plus `nosniff`, `Referrer-Policy`,
-`Permissions-Policy`, cross-origin isolation (`COOP`, `CORP`) and HSTS with preload. No
-`dangerouslySetInnerHTML` (ESLint enforced). Logs carry counts and codes only, never the brief or
-chat text. `npm audit` reports no known vulnerabilities.
+response cache. A per-request nonce CSP with no `'unsafe-inline'` scripts or style elements
+(`script-src 'self' 'nonce-…' 'strict-dynamic'`, `style-src` by nonce or hash, no `unsafe-eval`
+in production, `frame-ancestors 'none'`), checked end to end by an E2E test that fails on any CSP
+violation, plus `nosniff`, `Referrer-Policy`, `Permissions-Policy`, cross-origin isolation
+(`COOP`, `CORP`) and HSTS with preload. No `dangerouslySetInnerHTML` (ESLint enforced). Logs carry
+counts and codes only, never the brief or chat text. `npm audit` reports no known
+vulnerabilities, and CodeQL scans every push. See [SECURITY.md](SECURITY.md) to report a problem.
 
 **Accessibility** ([plan/08](plan/08-ui-ux-accessibility.md)). WCAG 2.1 AA: landmarks, a skip
 link, one `h1` per page, labels above every input, errors linked with `aria-describedby` and a
