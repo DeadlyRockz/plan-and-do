@@ -13,7 +13,7 @@
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "e2e": "playwright test",
-    "eval:ai": "tsx scripts/eval-ai.ts"
+    "eval:ai": "tsx --conditions=react-server --env-file-if-exists=.env.local scripts/eval-ai.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^1.3.0",
