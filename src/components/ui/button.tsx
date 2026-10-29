@@ -1,7 +1,7 @@
-import * as React from "react";
 import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "cn";
 import { Slot } from "radix-ui";
+import * as React from "react";
 
 /** Every size keeps a 44px touch target (rule 9.7); radius follows rule 9.6 for controls. */
 const buttonVariants = cva(

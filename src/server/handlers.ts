@@ -3,6 +3,8 @@ import { createHash } from "node:crypto";
 import { z } from "zod";
 import type { PlannerAI } from "@/ai/planner-ai";
 import { IDEAS_PROMPT_VERSION, REFINE_PROMPT_VERSION } from "@/ai/prompts";
+import { createEventBriefSchema, stripControlCharacters, type EventBrief } from "@/domain/brief";
+import { buildPlan } from "@/domain/build-plan";
 import {
   ChatTurnSchema,
   MAX_HISTORY_TURNS,
@@ -10,8 +12,6 @@ import {
   type ChatTurn,
   type PlanIdeas,
 } from "@/domain/contracts";
-import { createEventBriefSchema, stripControlCharacters, type EventBrief } from "@/domain/brief";
-import { buildPlan } from "@/domain/build-plan";
 import {
   assertSameOriginJson,
   errorResponse,

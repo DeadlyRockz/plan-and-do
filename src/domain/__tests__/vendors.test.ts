@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { buildPlan } from "../build-plan";
 import type { EventBrief } from "../brief";
+import { buildPlan } from "../build-plan";
 import { addDays } from "../dates";
 import { EVENT_TYPES, SETTINGS, SUBTYPES, type Subtype } from "../event-types";
 import { VENDOR_CATALOG } from "../reference/vendors";

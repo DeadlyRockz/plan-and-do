@@ -1,10 +1,10 @@
 "use client";
 
 import { WarningOctagonIcon } from "@phosphor-icons/react/ssr";
-import { PageContainer } from "@/components/page-container";
-import { Button } from "@/components/ui/button";
-import { SPACE, TYPE } from "@/components/styles";
 import { cn } from "cn";
+import { PageContainer } from "@/components/page-container";
+import { SPACE, TYPE } from "@/components/styles";
+import { Button } from "@/components/ui/button";
 
 /** The route-level error state. It never shows the error's message, which may be technical. */
 export default function ErrorPage({

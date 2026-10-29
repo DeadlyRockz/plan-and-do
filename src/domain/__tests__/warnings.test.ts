@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { buildPlan } from "../build-plan";
 import type { EventBrief } from "../brief";
+import { buildPlan } from "../build-plan";
 import { addDays } from "../dates";
 import { buildWarnings, nearestOffPeakDate, type WarningInput } from "../warnings";
 import { makeBrief, TODAY } from "./fixtures";

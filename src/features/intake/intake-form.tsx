@@ -1,9 +1,10 @@
 "use client";
 
 import { ArrowLeftIcon, ArrowRightIcon } from "@phosphor-icons/react/ssr";
+import { cn } from "cn";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState, type FormEvent } from "react";
-import { cn } from "cn";
+import { TYPE } from "@/components/styles";
 import { Button } from "@/components/ui/button";
 import { planStore } from "@/lib/plan-store";
 import { useToday } from "@/lib/use-today";
@@ -14,7 +15,6 @@ import { INITIAL_VALUES, STEPS, validate, type FieldErrors, type FormValues } fr
 import { GuestsStep } from "./guests-step";
 import { PreferencesStep } from "./preferences-step";
 import type { SetField } from "./step-props";
-import { TYPE } from "@/components/styles";
 
 const STEP_COMPONENTS = [EventStep, GuestsStep, PreferencesStep];
 const LAST_STEP = STEPS.length - 1;

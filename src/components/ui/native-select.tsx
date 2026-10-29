@@ -1,6 +1,6 @@
-import * as React from "react";
-import { cn } from "cn";
 import { CaretDownIcon } from "@phosphor-icons/react/ssr";
+import { cn } from "cn";
+import * as React from "react";
 
 /**
  * The platform select, styled. It is the most robust choice for keyboards, screen readers and

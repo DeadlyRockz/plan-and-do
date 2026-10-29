@@ -1,8 +1,8 @@
+import { cn } from "cn";
 import Link from "next/link";
 import { PageContainer } from "@/components/page-container";
-import { buttonVariants } from "@/components/ui/button";
 import { SPACE, TYPE } from "@/components/styles";
-import { cn } from "cn";
+import { buttonVariants } from "@/components/ui/button";
 
 export const metadata = { title: "Page not found" };
 

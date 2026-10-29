@@ -1,5 +1,5 @@
-import * as React from "react";
 import { cn } from "cn";
+import * as React from "react";
 
 /** text-base keeps iOS from zooming on focus (rule 9.3). */
 function Input({ className, type, ...props }: React.ComponentProps<"input">) {

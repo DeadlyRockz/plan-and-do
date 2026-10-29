@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
+import type { EventBrief } from "../brief";
 import { derivePlanContext } from "../context";
 import { addDays } from "../dates";
-import type { EventBrief } from "../brief";
 import { EVENT_TYPES } from "../event-types";
 import { TIMELINE_TEMPLATES } from "../reference/milestones";
 import { milestoneTemplatesFor, scheduleMilestones } from "../timeline";

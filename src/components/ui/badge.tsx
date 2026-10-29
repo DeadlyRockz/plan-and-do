@@ -1,6 +1,6 @@
-import * as React from "react";
 import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "cn";
+import * as React from "react";
 
 /**
  * Status pills. Text sits on an opaque card surface so its contrast is fixed (rule 9.4), and

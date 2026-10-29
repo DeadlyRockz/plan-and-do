@@ -3,15 +3,15 @@
 import { PaperPlaneTiltIcon } from "@phosphor-icons/react/ssr";
 import { cn } from "cn";
 import { useEffect, useId, useRef, type FormEvent, type KeyboardEvent } from "react";
-import { MAX_MESSAGE_CHARACTERS } from "@/domain/contracts";
-import type { IsoDate } from "@/domain/dates";
-import { exampleChanges } from "@/domain/suggestions";
+import { TYPE } from "@/components/styles";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import type { SavedPlan } from "@/lib/storage";
+import { MAX_MESSAGE_CHARACTERS } from "@/domain/contracts";
+import type { IsoDate } from "@/domain/dates";
+import { exampleChanges } from "@/domain/suggestions";
 import { FieldError } from "@/features/shared/field-error";
-import { TYPE } from "@/components/styles";
+import type { SavedPlan } from "@/lib/storage";
 import { useRefineChat } from "./use-refine-chat";
 
 /** The last "Try asking" starter, after two example changes that demo mode can apply. */

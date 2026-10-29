@@ -1,16 +1,16 @@
 "use client";
 
 import { RadioGroup as RadioGroupPrimitive } from "radix-ui";
+import { TYPE } from "@/components/styles";
 import { DatePicker } from "@/components/ui/date-picker";
 import { Input } from "@/components/ui/input";
 import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select";
 import { addYears } from "@/domain/dates";
-import { isOneOf } from "@/domain/text";
 import { EVENT_TYPES, EVENT_TYPE_LABELS, SUBTYPES, SUBTYPE_LABELS } from "@/domain/event-types";
+import { isOneOf } from "@/domain/text";
 import { EVENT_TYPE_DESCRIPTIONS, EVENT_TYPE_ICONS } from "@/features/shared/event-meta";
 import { Field, FieldGroup } from "./field";
 import type { StepProps } from "./step-props";
-import { TYPE } from "@/components/styles";
 
 export function EventStep({ values, errors, set, today }: StepProps) {
   const subtypes = values.eventType ? SUBTYPES[values.eventType] : [];

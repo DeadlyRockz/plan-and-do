@@ -1,5 +1,5 @@
-import { CakeIcon, HeartIcon, UsersThreeIcon } from "@phosphor-icons/react/ssr";
 import type { Icon } from "@phosphor-icons/react";
+import { CakeIcon, HeartIcon, UsersThreeIcon } from "@phosphor-icons/react/ssr";
 import type { EventBrief } from "@/domain/brief";
 import { SUBTYPE_LABELS, type EventType } from "@/domain/event-types";
 

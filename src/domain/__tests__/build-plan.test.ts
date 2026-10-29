@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { buildPlan } from "../build-plan";
-import { formatDate, formatMoney, formatShare, moneyFromMajor } from "../money";
 import { EVENT_TYPES } from "../event-types";
+import { formatDate, formatMoney, formatShare, moneyFromMajor } from "../money";
 import { makeBrief, TODAY } from "./fixtures";
 
 describe("buildPlan", () => {

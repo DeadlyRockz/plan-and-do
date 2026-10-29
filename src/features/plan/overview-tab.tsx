@@ -1,17 +1,17 @@
 import { ArrowRightIcon } from "@phosphor-icons/react/ssr";
+import { cn } from "cn";
+import { SPACE, TYPE } from "@/components/styles";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 import type { EventBrief } from "@/domain/brief";
 import type { PlanSkeleton } from "@/domain/build-plan";
 import type { IsoDate } from "@/domain/dates";
-import type { Warning } from "@/domain/warnings";
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { formatCount, formatDate, formatMoney } from "@/lib/format";
 import { EVENT_TYPE_LABELS } from "@/domain/event-types";
+import type { Warning } from "@/domain/warnings";
 import { SEVERITY_STATUS, StatusBadge } from "@/features/shared/status-badges";
+import { formatCount, formatDate, formatMoney } from "@/lib/format";
 import { GroupHeading, PanelHeading } from "./panel-heading";
-import { SPACE, TYPE } from "@/components/styles";
-import { cn } from "cn";
 
 /** How many open milestones "Next up" lists before pointing to the full timeline. */
 const NEXT_UP_COUNT = 3;

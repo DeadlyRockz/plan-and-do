@@ -7,9 +7,9 @@ import { EventBriefSchema, type EventBrief, type EventBriefInput } from "@/domai
 import type { PlanIdeas } from "@/domain/contracts";
 import { addDays } from "@/domain/dates";
 import { briefFingerprint } from "@/domain/fingerprint";
+import { newSavedPlan } from "@/features/intake/create-plan";
 import { planStore } from "@/lib/plan-store";
 import { STORAGE_KEY, type SavedPlan } from "@/lib/storage";
-import { newSavedPlan } from "@/features/intake/create-plan";
 import { PlanView } from "../plan-view";
 
 const push = vi.fn();

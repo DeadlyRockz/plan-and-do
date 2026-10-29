@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
-import { EMPTY_USAGE, PlannerAIError, type PlannerAI } from "@/ai/planner-ai";
 import { sampleIdeas, weddingBrief } from "@/ai/__tests__/fixtures";
+import { EMPTY_USAGE, PlannerAIError, type PlannerAI } from "@/ai/planner-ai";
 import {
   createHealthHandler,
   createIdeasHandler,

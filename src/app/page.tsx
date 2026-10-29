@@ -1,10 +1,10 @@
+import { cn } from "cn";
 import { PageContainer } from "@/components/page-container";
+import { SPACE, TYPE } from "@/components/styles";
 import { Card } from "@/components/ui/card";
 import { Hero } from "@/features/intake/hero";
 import { IntakeForm } from "@/features/intake/intake-form";
 import { WhatYouGet } from "@/features/intake/what-you-get";
-import { SPACE, TYPE } from "@/components/styles";
-import { cn } from "cn";
 
 export const metadata = { title: "Plan your event" };
 

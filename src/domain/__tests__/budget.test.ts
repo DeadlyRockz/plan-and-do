@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest";
 import { allocateBudget, splitProportionally, type Budget } from "../budget";
-import { CURRENCIES } from "../money";
-import { BASE_SPLITS } from "../reference/budget-lines";
 import { EVENT_TYPES, SETTINGS, SUBTYPES } from "../event-types";
+import { CURRENCIES } from "../money";
 import { makeBrief, pick, seededRandom } from "./fixtures";
+import { BASE_SPLITS } from "../reference/budget-lines";
 
 const byId = (budget: Budget) =>
   Object.fromEntries(budget.lines.map((line) => [line.id, line.amount.minor]));

@@ -1,5 +1,6 @@
 "use client";
 
+import type { Icon } from "@phosphor-icons/react";
 import {
   CalendarBlankIcon,
   MapPinIcon,
@@ -8,14 +9,17 @@ import {
   UsersIcon,
   WalletIcon,
 } from "@phosphor-icons/react/ssr";
-import type { Icon } from "@phosphor-icons/react";
 import type { ReactNode } from "react";
+import { TYPE } from "@/components/styles";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import type { EventBrief } from "@/domain/brief";
 import type { PlanContext } from "@/domain/context";
 import type { IsoDate } from "@/domain/dates";
 import { EVENT_TYPE_LABELS } from "@/domain/event-types";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { DeletePlanDialog } from "@/features/shared/delete-plan";
+import { EVENT_TYPE_ICONS } from "@/features/shared/event-meta";
+import { MODE_STATUS, StatusBadge } from "@/features/shared/status-badges";
 import {
   formatCount,
   formatCountdown,
@@ -23,10 +27,6 @@ import {
   formatMoney,
   moneyFromMajor,
 } from "@/lib/format";
-import { DeletePlanDialog } from "@/features/shared/delete-plan";
-import { EVENT_TYPE_ICONS } from "@/features/shared/event-meta";
-import { MODE_STATUS, StatusBadge } from "@/features/shared/status-badges";
-import { TYPE } from "@/components/styles";
 
 type PlanHeaderProps = {
   title: string;

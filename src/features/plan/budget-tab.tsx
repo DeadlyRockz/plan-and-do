@@ -1,7 +1,7 @@
 import { InfoIcon, StarIcon } from "@phosphor-icons/react/ssr";
+import { Badge } from "@/components/ui/badge";
 import type { Budget } from "@/domain/budget";
 import type { PlanIdeas } from "@/domain/contracts";
-import { Badge } from "@/components/ui/badge";
 import { formatCount, formatMoney, formatShare } from "@/lib/format";
 import { PanelHeading } from "./panel-heading";
 

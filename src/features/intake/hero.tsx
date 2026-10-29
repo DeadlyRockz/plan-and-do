@@ -1,10 +1,10 @@
 import { ArrowDownIcon } from "@phosphor-icons/react/ssr";
+import { cn } from "cn";
 import { PageContainer } from "@/components/page-container";
+import { SPACE, TYPE } from "@/components/styles";
 import { Button } from "@/components/ui/button";
 import type { IsoDate } from "@/domain/dates";
 import { SamplePlanPreview } from "./sample-plan-preview";
-import { SPACE, TYPE } from "@/components/styles";
-import { cn } from "cn";
 
 /** Asymmetric split hero: the promise on the left, a live sample plan on the right. */
 export function Hero({ today }: { today: IsoDate }) {

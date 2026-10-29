@@ -4,9 +4,9 @@ import userEvent from "@testing-library/user-event";
 import { renderToString } from "react-dom/server";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { EventBriefSchema } from "@/domain/brief";
+import { newSavedPlan } from "@/features/intake/create-plan";
 import { planStore } from "@/lib/plan-store";
 import type { SavedPlan } from "@/lib/storage";
-import { newSavedPlan } from "@/features/intake/create-plan";
 import { SavedPlansList } from "../saved-plans-list";
 
 const toast = vi.hoisted(() => Object.assign(vi.fn(), { warning: vi.fn() }));

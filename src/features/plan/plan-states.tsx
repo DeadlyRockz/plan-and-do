@@ -1,11 +1,11 @@
 import { FolderOpenIcon } from "@phosphor-icons/react/ssr";
+import { cn } from "cn";
 import Link from "next/link";
 import { PageContainer } from "@/components/page-container";
 import { SPACE, TYPE } from "@/components/styles";
 import { buttonVariants } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Notice } from "@/features/shared/notice";
-import { cn } from "cn";
 
 /** Shown while the plan loads from this browser's storage. */
 export function PlanLoading() {

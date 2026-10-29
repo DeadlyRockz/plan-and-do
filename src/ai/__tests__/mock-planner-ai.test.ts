@@ -1,8 +1,8 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { EVENT_TYPES } from "@/domain/event-types";
 import { EventBriefSchema, type EventBrief } from "@/domain/brief";
-import { MockPlannerAI, parsePatch } from "../mock-planner-ai";
 import { PlanIdeasSchema } from "@/domain/contracts";
+import { EVENT_TYPES } from "@/domain/event-types";
+import { MockPlannerAI, parsePatch } from "../mock-planner-ai";
 import { skeletonFor, TODAY, weddingBrief } from "./fixtures";
 
 const mock = new MockPlannerAI();

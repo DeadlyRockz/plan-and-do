@@ -1,7 +1,7 @@
-import { PageContainer } from "@/components/page-container";
-import { Skeleton } from "@/components/ui/skeleton";
-import { SPACE } from "@/components/styles";
 import { cn } from "cn";
+import { PageContainer } from "@/components/page-container";
+import { SPACE } from "@/components/styles";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function Loading() {
   return (

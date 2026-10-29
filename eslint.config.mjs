@@ -29,6 +29,17 @@ const eslintConfig = defineConfig([
     rules: {
       "react/no-danger": "error",
       "no-console": "error",
+      // One import order everywhere: packages, then "@/" modules, then relative files.
+      "import/order": [
+        "error",
+        {
+          groups: ["builtin", "external", "internal", ["parent", "sibling", "index"]],
+          pathGroups: [{ pattern: "@/**", group: "internal" }],
+          pathGroupsExcludedImportTypes: ["builtin"],
+          alphabetize: { order: "asc", caseInsensitive: true },
+          "newlines-between": "never",
+        },
+      ],
       "@typescript-eslint/no-restricted-imports": [
         "error",
         {

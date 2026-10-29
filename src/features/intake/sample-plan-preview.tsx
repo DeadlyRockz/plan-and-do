@@ -1,11 +1,11 @@
 import { CalendarBlankIcon, UsersIcon, WalletIcon } from "@phosphor-icons/react/ssr";
 import { cn } from "cn";
+import { TYPE } from "@/components/styles";
 import { EventBriefSchema } from "@/domain/brief";
 import { buildPlan } from "@/domain/build-plan";
 import { addDays, type IsoDate } from "@/domain/dates";
 import { formatDate, formatMoney, formatShare } from "@/domain/money";
 import { MODE_STATUS, SEVERITY_STATUS, StatusBadge } from "@/features/shared/status-badges";
-import { TYPE } from "@/components/styles";
 
 const SEGMENT_COLOURS = ["bg-chart-1", "bg-chart-2", "bg-chart-3", "bg-chart-4", "bg-chart-5"];
 const SAMPLE_LEAD_DAYS = 200;

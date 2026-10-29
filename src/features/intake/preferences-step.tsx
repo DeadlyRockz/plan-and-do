@@ -1,9 +1,9 @@
 "use client";
 
+import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Badge } from "@/components/ui/badge";
 import { TEXT_LIMITS, MAX_PRIORITIES } from "@/domain/brief";
 import {
   ACCESSIBILITY_LABELS,

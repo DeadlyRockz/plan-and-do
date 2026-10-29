@@ -7,16 +7,16 @@ import {
   WarningOctagonIcon,
 } from "@phosphor-icons/react/ssr";
 import { cn } from "cn";
-import type { IsoDate } from "@/domain/dates";
-import type { PlanMode } from "@/domain/context";
-import type { Milestone } from "@/domain/timeline";
+import { SPACE } from "@/components/styles";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
+import type { PlanMode } from "@/domain/context";
+import type { IsoDate } from "@/domain/dates";
+import type { Milestone } from "@/domain/timeline";
 import { formatDate, formatMonth } from "@/lib/format";
 import { GroupHeading, PanelHeading } from "./panel-heading";
-import { SPACE } from "@/components/styles";
 
 type TimelineProps = {
   milestones: readonly Milestone[];

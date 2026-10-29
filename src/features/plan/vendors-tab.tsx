@@ -1,17 +1,17 @@
 "use client";
 
 import { SparkleIcon, WarningOctagonIcon } from "@phosphor-icons/react/ssr";
-import type { Budget } from "@/domain/budget";
-import type { PlanIdeas } from "@/domain/contracts";
-import type { IsoDate } from "@/domain/dates";
-import type { VendorItem } from "@/domain/vendors";
+import { TYPE } from "@/components/styles";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
+import type { Budget } from "@/domain/budget";
+import type { PlanIdeas } from "@/domain/contracts";
+import type { IsoDate } from "@/domain/dates";
+import type { VendorItem } from "@/domain/vendors";
 import { formatDate } from "@/lib/format";
 import { PanelHeading } from "./panel-heading";
-import { TYPE } from "@/components/styles";
 
 type VendorsProps = {
   vendors: readonly VendorItem[];

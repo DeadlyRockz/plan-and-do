@@ -1,11 +1,11 @@
 "use client";
 
-import * as React from "react";
+import { XIcon } from "@phosphor-icons/react";
 import { cn } from "cn";
 import { Dialog as SheetPrimitive } from "radix-ui";
-import { XIcon } from "@phosphor-icons/react";
-import { Button } from "@/components/ui/button";
+import * as React from "react";
 import { TYPE } from "@/components/styles";
+import { Button } from "@/components/ui/button";
 
 const Sheet = SheetPrimitive.Root;
 const SheetTrigger = SheetPrimitive.Trigger;

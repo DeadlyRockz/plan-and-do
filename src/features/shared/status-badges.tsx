@@ -1,3 +1,4 @@
+import type { Icon } from "@phosphor-icons/react";
 import {
   CheckCircleIcon,
   HourglassIcon,
@@ -6,10 +7,9 @@ import {
   WarningIcon,
   WarningOctagonIcon,
 } from "@phosphor-icons/react/ssr";
-import type { Icon } from "@phosphor-icons/react";
+import { Badge } from "@/components/ui/badge";
 import type { PlanMode } from "@/domain/context";
 import type { WarningSeverity } from "@/domain/warnings";
-import { Badge } from "@/components/ui/badge";
 
 type Status = { label: string; icon: Icon; variant: "primary" | "warning" | "destructive" };
 

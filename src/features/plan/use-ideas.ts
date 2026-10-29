@@ -4,10 +4,10 @@ import { useCallback, useEffect, useEffectEvent, useState } from "react";
 import type { PlanIdeas } from "@/domain/contracts";
 import type { IsoDate } from "@/domain/dates";
 import { briefFingerprint } from "@/domain/fingerprint";
+import { retryWindowFrom, type RetryWindow } from "@/features/shared/use-countdown";
 import { isAbortError, requestIdeas } from "@/lib/api-client";
 import { planStore } from "@/lib/plan-store";
 import type { SavedPlan } from "@/lib/storage";
-import { retryWindowFrom, type RetryWindow } from "@/features/shared/use-countdown";
 
 type IdeasError = { status: "error"; message: string; retry?: RetryWindow };
 

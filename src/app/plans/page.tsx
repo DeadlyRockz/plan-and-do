@@ -1,7 +1,7 @@
-import { PageContainer } from "@/components/page-container";
-import { SavedPlansList } from "@/features/saved-plans/saved-plans-list";
-import { SPACE, TYPE } from "@/components/styles";
 import { cn } from "cn";
+import { PageContainer } from "@/components/page-container";
+import { SPACE, TYPE } from "@/components/styles";
+import { SavedPlansList } from "@/features/saved-plans/saved-plans-list";
 
 export const metadata = { title: "Saved plans" };
 

@@ -2,17 +2,17 @@
 
 import { ArrowClockwiseIcon } from "@phosphor-icons/react/ssr";
 import { cn } from "cn";
-import type { Budget } from "@/domain/budget";
-import type { PlanIdeas } from "@/domain/contracts";
+import { SPACE, TYPE } from "@/components/styles";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import type { Budget } from "@/domain/budget";
+import type { PlanIdeas } from "@/domain/contracts";
 import { Notice } from "@/features/shared/notice";
 import { useCountdown, type RetryWindow } from "@/features/shared/use-countdown";
 import { GroupHeading, PanelHeading } from "./panel-heading";
 import type { IdeasState } from "./use-ideas";
-import { SPACE, TYPE } from "@/components/styles";
 
 /** Claude's ideas, with every state the call can be in (plan/08 §8.1, rule 9.8). */
 export function IdeasTab({

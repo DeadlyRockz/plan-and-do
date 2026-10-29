@@ -1,11 +1,11 @@
 "use client";
 
 import { WarningOctagonIcon } from "@phosphor-icons/react/ssr";
+import { cn } from "cn";
 import { useEffect, useRef } from "react";
+import { SPACE, TYPE } from "@/components/styles";
 import { focusField } from "@/lib/focus";
 import { fieldId, type FieldErrors, type FieldName } from "./form-model";
-import { SPACE, TYPE } from "@/components/styles";
-import { cn } from "cn";
 
 /**
  * Lists every error at the top of the form and takes focus when it appears, so keyboard and

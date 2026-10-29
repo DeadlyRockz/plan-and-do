@@ -1,12 +1,10 @@
 "use client";
 
 import { ChatCircleTextIcon } from "@phosphor-icons/react/ssr";
+import { cn } from "cn";
 import { useRouter } from "next/navigation";
 import { useMemo, useState, type ReactNode } from "react";
 import { toast } from "sonner";
-import { buildPlan, type PlanSkeleton } from "@/domain/build-plan";
-import type { IsoDate } from "@/domain/dates";
-import { isOneOf, slugify } from "@/domain/text";
 import { PageContainer } from "@/components/page-container";
 import { SPACE } from "@/components/styles";
 import { Button } from "@/components/ui/button";
@@ -19,18 +17,20 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { buildPlan, type PlanSkeleton } from "@/domain/build-plan";
+import type { IsoDate } from "@/domain/dates";
+import { isOneOf, slugify } from "@/domain/text";
+import { ChatPanel } from "@/features/refine/chat-panel";
+import { deletePlanWithUndo } from "@/features/shared/delete-plan";
+import { eventTitle } from "@/features/shared/event-meta";
+import { Notice } from "@/features/shared/notice";
+import { useStorageNotices } from "@/features/shared/storage-notices";
 import { downloadTextFile } from "@/lib/download";
 import { buildCalendar } from "@/lib/ics";
 import { planStore, usePlan } from "@/lib/plan-store";
 import type { SavedPlan } from "@/lib/storage";
 import { useMediaQuery } from "@/lib/use-hydrated";
 import { useToday } from "@/lib/use-today";
-import { ChatPanel } from "@/features/refine/chat-panel";
-import { deletePlanWithUndo } from "@/features/shared/delete-plan";
-import { eventTitle } from "@/features/shared/event-meta";
-import { Notice } from "@/features/shared/notice";
-import { useStorageNotices } from "@/features/shared/storage-notices";
-import { cn } from "cn";
 import { BudgetTab } from "./budget-tab";
 import { IdeasTab } from "./ideas-tab";
 import { OverviewTab } from "./overview-tab";
