@@ -30,7 +30,10 @@ export async function expectAccessible(page: Page, label: string): Promise<void>
       ["serious", "critical"].includes(violation.impact ?? ""),
     );
     expect(
-      blocking.map((violation) => `${violation.id}: ${violation.nodes.map((node) => node.target.join(" ")).join(", ")}`),
+      blocking.map(
+        (violation) =>
+          `${violation.id}: ${violation.nodes.map((node) => node.target.join(" ")).join(", ")}`,
+      ),
       `${label} (${colorScheme})`,
     ).toEqual([]);
   }
@@ -65,7 +68,8 @@ export async function createPlan(page: Page, intake: Intake): Promise<void> {
   if (intake.outdoor) await page.getByRole("radio", { name: "Outdoors" }).click();
   await page.getByRole("button", { name: "Next", exact: true }).click();
 
-  for (const priority of intake.priorities ?? []) await page.getByLabel(priority, { exact: true }).check();
+  for (const priority of intake.priorities ?? [])
+    await page.getByLabel(priority, { exact: true }).check();
   for (const need of intake.needs ?? []) await page.getByLabel(need, { exact: true }).check();
   await page.getByRole("button", { name: "Build my plan" }).click();
   await page.waitForURL(/\/plan\//);

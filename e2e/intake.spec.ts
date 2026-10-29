@@ -63,6 +63,8 @@ test("intake_form_completes_with_keyboard_only", async ({ page }) => {
 test("no_horizontal_scroll_at_320px", async ({ page }) => {
   await page.setViewportSize({ width: 320, height: 720 });
   await page.goto("/");
-  const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
+  const overflow = await page.evaluate(
+    () => document.documentElement.scrollWidth - window.innerWidth,
+  );
   expect(overflow).toBeLessThanOrEqual(0);
 });
