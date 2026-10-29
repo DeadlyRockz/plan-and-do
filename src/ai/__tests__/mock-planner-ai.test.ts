@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { EVENT_TYPES } from "@/domain/event-types";
 import { EventBriefSchema } from "@/domain/brief";
 import { MockPlannerAI, parsePatch } from "../mock-planner-ai";
-import { PlanIdeasSchema } from "../schemas";
+import { PlanIdeasSchema } from "@/domain/contracts";
 import { skeletonFor, TODAY, weddingBrief } from "./fixtures";
 
 const mock = new MockPlannerAI();

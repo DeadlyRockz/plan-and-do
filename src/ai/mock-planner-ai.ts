@@ -17,7 +17,8 @@ import {
   type RefineRequest,
   type RefineResult,
 } from "./planner-ai";
-import type { BriefPatch, PlanIdeas } from "./schemas";
+import type { PlanIdeas } from "@/domain/contracts";
+import type { BriefPatch } from "./schemas";
 
 /**
  * Deterministic stand-in for Claude (plan/06 §6.8). It builds ideas from fixtures that reference

@@ -1,5 +1,5 @@
 import type { PlanSkeleton } from "@/domain/build-plan";
-import type { PlanIdeas } from "./schemas";
+import type { PlanIdeas } from "@/domain/contracts";
 
 /**
  * Drops vendor tips and saving ideas that point at ids the rules engine did not produce, so the

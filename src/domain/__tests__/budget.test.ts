@@ -86,9 +86,9 @@ describe("allocateBudget", () => {
 
   it("funds_priority_bonus_proportionally_from_donor_lines", () => {
     const budget = allocateBudget(makeBrief("wedding", { priorities: ["catering"] }));
-    // Donors (venue, photography, attire, decor, entertainment, invitations, transport) hold 62%,
-    // so venue gives 30/74.4 of the ₹60,000 bonus (one paisa added by largest remainder).
-    expect(byId(budget).venue).toBe(27_580_645);
+    // Donors hold ₹7,44,000 of the ₹12,00,000; venue gives 300/744 of the ₹60,000 bonus, in whole
+    // rupees, plus one rupee by largest remainder.
+    expect(byId(budget).venue).toBe(27_580_600);
   });
 
   it("never_drops_a_donor_line_below_one_percent", () => {
@@ -177,6 +177,17 @@ describe("allocateBudget", () => {
         .map((line) => line.id)
         .sort(),
     ).toEqual(["catering", "venue"]);
+  });
+
+  it("allocates_whole_currency_units_when_the_budget_is_whole", () => {
+    const budget = allocateBudget(
+      makeBrief("wedding", {
+        guestCount: 180,
+        budget: { amount: 1_500_000, currency: "INR" },
+        priorities: ["catering"],
+      }),
+    );
+    expect(budget.lines.every((line) => line.amount.minor % 100 === 0)).toBe(true);
   });
 
   it("handles_one_guest_and_a_billion_budget", () => {

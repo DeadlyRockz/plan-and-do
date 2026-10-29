@@ -9,7 +9,7 @@ import {
   MAX_MESSAGE_CHARACTERS,
   type ChatTurn,
   type PlanIdeas,
-} from "@/ai/schemas";
+} from "@/domain/contracts";
 import { createEventBriefSchema, stripControlCharacters, type EventBrief } from "@/domain/brief";
 import { buildPlan } from "@/domain/build-plan";
 import {

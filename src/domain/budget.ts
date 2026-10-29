@@ -26,6 +26,7 @@ export type Budget = { total: Money; lines: BudgetLine[] };
 export const PRIORITY_BONUS_BASIS_POINTS = [500, 300, 200] as const;
 
 const BASIS_POINTS = 10_000n;
+const MINOR_PER_MAJOR = 100n;
 const DONOR_FLOOR_BASIS_POINTS = 100n;
 const OWN_VENUE_KEEP_PERCENT = 20n;
 const PRIORITY_REASONS = [
@@ -49,7 +50,10 @@ type WorkingLine = {
  * priority bonus.
  */
 export function allocateBudget(brief: EventBrief): Budget {
-  const total = BigInt(toMinorUnits(brief.budget.amount));
+  const totalMinor = BigInt(toMinorUnits(brief.budget.amount));
+  // A whole-amount budget is split in whole currency units, so no line shows paise or cents.
+  const unit = totalMinor % MINOR_PER_MAJOR === 0n ? MINOR_PER_MAJOR : 1n;
+  const total = totalMinor / unit;
   const floor = (total * DONOR_FLOOR_BASIS_POINTS) / BASIS_POINTS;
   const lines = baseLines(brief, total);
 
@@ -75,7 +79,7 @@ export function allocateBudget(brief: EventBrief): Budget {
   }
   applyPriorities(lines, validPriorities(brief), total, floor);
 
-  return toBudget(lines, total, brief.budget.currency);
+  return toBudget(lines, total, unit, brief.budget.currency);
 }
 
 /**
@@ -224,16 +228,21 @@ function takeFromDonors(donors: WorkingLine[], amount: bigint, floor: bigint): b
   return amount - remaining;
 }
 
-function toBudget(lines: WorkingLine[], total: bigint, currency: Money["currency"]): Budget {
+function toBudget(
+  lines: WorkingLine[],
+  total: bigint,
+  unit: bigint,
+  currency: Money["currency"],
+): Budget {
   const sorted = [...lines].sort((a, b) => compareBigInt(b.amount, a.amount));
   return {
-    total: { minor: Number(total), currency },
+    total: { minor: Number(total * unit), currency },
     lines: sorted.map((line) => ({
       id: line.id,
       label: line.label,
       basisPoints:
         total === 0n ? 0 : Number((line.amount * BASIS_POINTS * 2n + total) / (total * 2n)),
-      amount: { minor: Number(line.amount), currency },
+      amount: { minor: Number(line.amount * unit), currency },
       ...(line.reasons.length > 0 && { reason: line.reasons.join(" ") }),
       ...(line.priorityRank !== undefined && { priorityRank: line.priorityRank }),
     })),

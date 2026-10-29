@@ -80,6 +80,11 @@ describe("buildVendorChecklist", () => {
   });
 
   it("keeps_between_three_and_five_questions_per_vendor", () => {
+    const minimal = buildPlan(
+      makeBrief("community", { accessibilityNeeds: ["wheelchair"] }),
+      TODAY,
+    );
+    expect(minimal.vendors.every((item) => item.questions.length >= 3)).toBe(true);
     const plan = buildPlan(
       makeBrief("community", {
         guestCount: 400,

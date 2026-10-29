@@ -366,7 +366,11 @@ export const VENDOR_CATALOG: readonly VendorRule[] = [
     bookByMilestoneId: () => "confirm-accessibility",
     why: (brief) =>
       `You listed ${listAccessibility(brief.accessibilityNeeds)}, so arrange them with the venue early.`,
-    questions: (brief) => brief.accessibilityNeeds.map((need) => ACCESSIBILITY_QUESTIONS[need]),
+    questions: (brief) => [
+      ...brief.accessibilityNeeds.map((need) => ACCESSIBILITY_QUESTIONS[need]),
+      "Who at the venue is our contact for access needs on the day?",
+      "Can we visit beforehand to check the route from arrival to seating?",
+    ],
   },
   {
     id: "coordinator",

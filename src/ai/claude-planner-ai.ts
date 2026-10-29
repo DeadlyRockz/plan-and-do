@@ -19,7 +19,8 @@ import {
   REFINE_SYSTEM_PROMPT,
 } from "./prompts";
 import { dropUnknownReferences } from "./references";
-import { BriefPatchSchema, PlanIdeasSchema } from "./schemas";
+import { PlanIdeasSchema } from "@/domain/contracts";
+import { BriefPatchSchema } from "./schemas";
 
 /** Settings from plan/06 §6.2. Sampling params and prefill are omitted: current models reject them. */
 const SERVER_SIDE_FALLBACK_BETA = "server-side-fallback-2026-07-01";

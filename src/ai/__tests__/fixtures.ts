@@ -1,6 +1,6 @@
 import { EventBriefSchema, type EventBrief, type EventBriefInput } from "@/domain/brief";
 import { buildPlan, type PlanSkeleton } from "@/domain/build-plan";
-import type { PlanIdeas } from "../schemas";
+import type { PlanIdeas } from "@/domain/contracts";
 
 export const TODAY = "2026-10-29";
 

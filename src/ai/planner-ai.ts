@@ -1,7 +1,7 @@
 import type { EventBrief } from "@/domain/brief";
 import type { PlanSkeleton } from "@/domain/build-plan";
 import type { IsoDate } from "@/domain/dates";
-import type { ChatTurn, PlanIdeas } from "./schemas";
+import type { ChatTurn, PlanIdeas } from "@/domain/contracts";
 
 export type AdapterName = "claude" | "mock";
 
