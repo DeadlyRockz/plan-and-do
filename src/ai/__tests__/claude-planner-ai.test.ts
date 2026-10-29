@@ -239,6 +239,26 @@ describe("ClaudePlannerAI.refine", () => {
     ]);
   });
 
+  it("sends_a_tool_schema_without_numeric_bounds_strict_mode_rejects", async () => {
+    const toolRunner = vi.fn<RunnerFn>(async function* () {
+      yield textMessage("Done.");
+    });
+    await adapterWith({ toolRunner }).refine(refineRequest);
+    const tool = toolRunner.mock.calls[0]?.[0].tools[0] as unknown as { input_schema: unknown };
+    expect(JSON.stringify(tool.input_schema)).not.toMatch(
+      /"(minimum|maximum|exclusiveMinimum|exclusiveMaximum|multipleOf)"/,
+    );
+  });
+
+  it("rejects_a_fractional_guest_count_with_a_tool_error", async () => {
+    const { toolRunner, toolResults } = runnerCalling({ ...NULL_PATCH, guestCount: 80.5 });
+    const result = await adapterWith({ toolRunner }).refine(refineRequest);
+    expect([result.briefChanged, toolResults[0]]).toEqual([
+      false,
+      "error: Guest count must be a whole number.",
+    ]);
+  });
+
   it("sums_usage_across_every_turn_of_the_loop", async () => {
     const { toolRunner } = runnerCalling({ ...NULL_PATCH, guestCount: 80 });
     const result = await adapterWith({ toolRunner }).refine(refineRequest);

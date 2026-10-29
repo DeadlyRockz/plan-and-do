@@ -7,10 +7,12 @@ import { BUDGET_LINE_IDS } from "@/domain/reference/budget-lines";
  * Input of the `update_event_brief` tool. Every field is required but nullable, so the schema is
  * valid for strict tool use: the model sends `null` for anything that did not change.
  * `eventType` is deliberately absent; changing it means starting a new plan.
+ * No numeric bounds either: Zod's `.int()` emits safe-integer `minimum`/`maximum`, which strict
+ * tools reject with a 400. `applyBriefPatch` enforces whole numbers and ranges instead.
  */
 export const BriefPatchSchema = z.strictObject({
   eventDate: z.string().nullable().describe("New event date as YYYY-MM-DD, or null if unchanged."),
-  guestCount: z.number().int().nullable().describe("New number of guests, or null."),
+  guestCount: z.number().nullable().describe("New number of guests as a whole number, or null."),
   budgetAmount: z.number().nullable().describe("New total budget in major units, or null."),
   budgetCurrency: z.enum(CURRENCIES).nullable().describe("New budget currency, or null."),
   setting: z.enum(SETTINGS).nullable().describe("indoor, outdoor or either, or null."),
