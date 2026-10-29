@@ -28,6 +28,7 @@ import { Button } from "@/components/ui/button";
 import { formatCountdown, formatDate } from "@/lib/format";
 import { EVENT_TYPE_ICONS } from "@/features/shared/event-meta";
 import { MODE_STATUS, StatusBadge } from "@/features/shared/status-badges";
+import { TYPE } from "@/components/styles";
 
 type PlanHeaderProps = {
   title: string;
@@ -48,8 +49,8 @@ export function PlanHeader({ title, brief, context, today, onDelete }: PlanHeade
         </Badge>
         <StatusBadge status={MODE_STATUS[context.mode]} />
       </div>
-      <h1 className="text-3xl leading-tight font-semibold tracking-tight text-balance sm:text-4xl lg:text-5xl">{title}</h1>
-      <dl className="flex flex-wrap gap-x-6 gap-y-2 text-sm sm:text-base">
+      <h1 className={TYPE.pageTitle}>{title}</h1>
+      <dl className="flex flex-wrap gap-x-6 gap-y-2 text-base">
         <Fact icon={CalendarBlankIcon} label="Date">
           {formatDate(brief.eventDate)}
           <span className="text-muted-foreground"> ({formatCountdown(today, brief.eventDate)})</span>

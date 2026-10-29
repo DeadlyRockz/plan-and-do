@@ -1,17 +1,17 @@
 import Link from "next/link";
 import { PageContainer } from "@/components/page-container";
 import { buttonVariants } from "@/components/ui/button";
+import { SPACE, TYPE } from "@/components/styles";
+import { cn } from "cn";
 
 export const metadata = { title: "Page not found" };
 
 export default function NotFound() {
   return (
     <main id="main" tabIndex={-1} className="outline-none">
-      <PageContainer className="flex flex-col items-start gap-4 py-16 sm:py-24">
-        <h1 className="text-3xl leading-tight font-semibold tracking-tight sm:text-4xl lg:text-5xl">
-          Page not found
-        </h1>
-        <p className="max-w-prose text-base text-muted-foreground">
+      <PageContainer className={cn("flex flex-col items-start gap-4", SPACE.pageY)}>
+        <h1 className={TYPE.pageTitle}>Page not found</h1>
+        <p className={cn(TYPE.lead, "text-muted-foreground")}>
           That address doesn’t match any page here.
         </p>
         <Link href="/" className={buttonVariants()}>

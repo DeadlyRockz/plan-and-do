@@ -53,7 +53,10 @@ test("intake_form_completes_with_keyboard_only", async ({ page }) => {
   await expect(page.getByText("Step 2 of 3", { exact: true })).toBeVisible();
   await page.getByLabel("How many guests?").focus();
   await page.keyboard.type("25");
+  // Tab past the optional city field to the budget.
   await page.keyboard.press("Tab");
+  await page.keyboard.press("Tab");
+  await expect(page.getByLabel("Total budget")).toBeFocused();
   await page.keyboard.type("30000");
   await page.keyboard.press("Enter");
 

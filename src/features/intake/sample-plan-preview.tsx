@@ -5,6 +5,7 @@ import { buildPlan } from "@/domain/build-plan";
 import { addDays, type IsoDate } from "@/domain/dates";
 import { formatDate, formatMoney, formatShare } from "@/domain/money";
 import { MODE_STATUS, SEVERITY_STATUS, StatusBadge } from "@/features/shared/status-badges";
+import { TYPE } from "@/components/styles";
 
 const SEGMENT_COLOURS = ["bg-chart-1", "bg-chart-2", "bg-chart-3", "bg-chart-4", "bg-chart-5"];
 const SAMPLE_LEAD_DAYS = 200;
@@ -53,7 +54,7 @@ export function SamplePlanPreview({ today }: { today: IsoDate }) {
         <div className="flex flex-col gap-6 rounded-lg border bg-card p-4 sm:rounded-2xl sm:p-6">
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div className="flex flex-col gap-2">
-              <p className="text-base font-semibold">{brief.eventName}</p>
+              <p className={TYPE.cardTitle}>{brief.eventName}</p>
               <ul className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-muted-foreground">
                 <li className="flex items-center gap-1.5">
                   <CalendarBlankIcon size={16} aria-hidden="true" />

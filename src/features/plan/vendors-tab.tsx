@@ -11,6 +11,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { formatDate } from "@/lib/format";
 import { PanelHeading } from "./panel-heading";
+import { TYPE } from "@/components/styles";
 
 type VendorsProps = {
   vendors: readonly VendorItem[];
@@ -69,9 +70,9 @@ function VendorCard({
   const checkboxId = `vendor-${vendor.id}`;
   const isOverdue = !isBooked && vendor.bookBy < today;
   return (
-    <Card className="h-full gap-3 sm:p-5">
+    <Card className="h-full">
       <div className="flex items-start justify-between gap-3">
-        <h3 className="text-base leading-tight font-semibold">{vendor.label}</h3>
+        <h3 className={TYPE.cardTitle}>{vendor.label}</h3>
         <div className="-mt-3 -mr-1 flex min-h-11 shrink-0 items-center gap-2">
           <Checkbox id={checkboxId} checked={isBooked} onCheckedChange={(next) => onToggle(vendor.id, next === true)} />
           <Label htmlFor={checkboxId} className="font-normal">

@@ -5,6 +5,7 @@ import {
   SparkleIcon,
   WalletIcon,
 } from "@phosphor-icons/react/ssr";
+import { TYPE } from "@/components/styles";
 
 const OUTPUTS = [
   {
@@ -33,10 +34,7 @@ const OUTPUTS = [
 export function WhatYouGet() {
   return (
     <aside aria-labelledby="what-you-get-title" className="flex flex-col gap-6">
-      <h3
-        id="what-you-get-title"
-        className="text-lg leading-tight font-semibold sm:text-xl lg:text-2xl"
-      >
+      <h3 id="what-you-get-title" className={TYPE.groupTitle}>
         What you’ll get
       </h3>
       <ul className="flex flex-col gap-5">
@@ -46,7 +44,7 @@ export function WhatYouGet() {
               <OutputIcon size={20} weight="duotone" aria-hidden="true" />
             </span>
             <span className="flex flex-col gap-1">
-              <span className="text-base font-semibold">{title}</span>
+              <span className={TYPE.cardTitle}>{title}</span>
               <span className="text-sm text-muted-foreground">{body}</span>
             </span>
           </li>

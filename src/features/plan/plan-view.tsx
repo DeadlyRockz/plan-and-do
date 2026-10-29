@@ -9,6 +9,7 @@ import { buildPlan, type PlanSkeleton } from "@/domain/build-plan";
 import type { IsoDate } from "@/domain/dates";
 import { PageContainer } from "@/components/page-container";
 import { Button, buttonVariants } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 import { Sheet, SheetContent, SheetDescription, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -28,6 +29,8 @@ import { PlanHeader } from "./plan-header";
 import { TimelineTab } from "./timeline-tab";
 import { useIdeas } from "./use-ideas";
 import { VendorsTab } from "./vendors-tab";
+import { SPACE, TYPE } from "@/components/styles";
+import { cn } from "cn";
 
 const TABS = ["overview", "budget", "timeline", "vendors", "ideas"] as const;
 type Tab = (typeof TABS)[number];
@@ -64,7 +67,7 @@ function PlanDetails({ plan, today }: { plan: SavedPlan; today: IsoDate }) {
 
   if (!skeleton) {
     return (
-      <PageContainer className="py-12">
+      <PageContainer className={SPACE.pageY}>
         <Notice tone="warning" title="This plan couldn't be rebuilt">
           Its saved details are out of range. You can delete it from Saved plans.
         </Notice>
@@ -123,7 +126,7 @@ function PlanDetails({ plan, today }: { plan: SavedPlan; today: IsoDate }) {
   return (
     <main id="main" tabIndex={-1} className="outline-none">
       <title>{`${title} | Occasio`}</title>
-      <PageContainer className="flex flex-col gap-8 py-8 sm:py-12">
+      <PageContainer className={cn("flex flex-col gap-8", SPACE.pageY)}>
         <PlanHeader title={title} brief={plan.brief} context={skeleton.context} today={today} onDelete={deletePlan} />
         {isPast && (
           <Notice title="This event has passed">The plan is kept here for reference.</Notice>
@@ -183,7 +186,7 @@ function PlanDetails({ plan, today }: { plan: SavedPlan; today: IsoDate }) {
 
           {isDesktop && (
             <aside aria-label="Ask the planner" className="lg:col-span-3 print:hidden">
-              <div className="sticky top-6 rounded-2xl border bg-card p-6">{chat}</div>
+              <Card className="sticky top-6">{chat}</Card>
             </aside>
           )}
         </div>
@@ -195,7 +198,7 @@ function PlanDetails({ plan, today }: { plan: SavedPlan; today: IsoDate }) {
       {!isDesktop && (
         <Sheet>
           <SheetTrigger asChild>
-            <Button size="lg" className="fixed right-4 bottom-4 z-30 shadow-lg print:hidden">
+            <Button className="fixed right-4 bottom-4 z-30 shadow-lg print:hidden">
               <ChatCircleTextIcon size={20} aria-hidden="true" />
               Ask the planner
             </Button>
@@ -233,7 +236,7 @@ function slugify(text: string): string {
 function PlanLoading() {
   return (
     <main id="main" aria-busy="true" className="outline-none">
-      <PageContainer className="flex flex-col gap-6 py-8 sm:py-12">
+      <PageContainer className={cn("flex flex-col gap-6", SPACE.pageY)}>
         <p className="sr-only">Loading your plan</p>
         <Skeleton className="h-6 w-40 rounded-full" />
         <Skeleton className="h-12 w-3/4" />
@@ -250,12 +253,12 @@ function PlanLoading() {
 function PlanNotFound() {
   return (
     <main id="main" tabIndex={-1} className="outline-none">
-      <PageContainer className="flex flex-col items-start gap-4 py-16 sm:py-24">
+      <PageContainer className={cn("flex flex-col items-start gap-4", SPACE.pageY)}>
         <FolderOpenIcon size={40} weight="duotone" aria-hidden="true" className="text-muted-foreground" />
-        <h1 className="text-3xl leading-tight font-semibold tracking-tight sm:text-4xl lg:text-5xl">
+        <h1 className={TYPE.pageTitle}>
           We couldn’t find that plan
         </h1>
-        <p className="max-w-prose text-base text-muted-foreground">
+        <p className={cn(TYPE.lead, "text-muted-foreground")}>
           Plans are saved in the browser they were made in. It may have been deleted, or made on another
           device.
         </p>

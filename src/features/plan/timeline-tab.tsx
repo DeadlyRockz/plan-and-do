@@ -11,6 +11,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { formatDate, formatMonth } from "@/lib/format";
 import { GroupHeading, PanelHeading } from "./panel-heading";
+import { SPACE } from "@/components/styles";
 
 type TimelineProps = {
   milestones: readonly Milestone[];
@@ -103,7 +104,7 @@ function MilestoneRow({
   const isOverdue = !isDone && milestone.due < today;
   const isEventDay = milestone.id === "event-day";
   return (
-    <li className="flex flex-col gap-2 p-4 sm:flex-row sm:items-center sm:justify-between">
+    <li className={cn("flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between", SPACE.row)}>
       <div className="flex min-h-11 items-center gap-3">
         <Checkbox id={id} checked={isDone} onCheckedChange={(next) => onToggle(milestone.id, next === true)} />
         <Label htmlFor={id} className={cn("text-base font-normal", isDone && "text-muted-foreground line-through")}>

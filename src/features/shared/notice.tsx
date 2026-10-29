@@ -1,6 +1,7 @@
 import { InfoIcon, WarningIcon } from "@phosphor-icons/react/ssr";
 import { cn } from "cn";
 import type { ReactNode } from "react";
+import { SPACE } from "@/components/styles";
 
 /** A callout for messages that need attention. Text sits on the opaque card surface. */
 export function Notice({
@@ -20,7 +21,8 @@ export function Notice({
   return (
     <div
       className={cn(
-        "flex flex-col gap-3 rounded-xl border bg-card p-4 sm:flex-row sm:items-center sm:justify-between sm:rounded-2xl",
+        "flex flex-col gap-3 rounded-xl border bg-card sm:flex-row sm:items-center sm:justify-between sm:rounded-2xl",
+        SPACE.surface,
         tone === "warning" ? "border-warning" : "border-primary",
         className,
       )}

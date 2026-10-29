@@ -21,44 +21,58 @@ const SETTING_OPTIONS = [
 export function GuestsStep({ values, errors, set }: StepProps) {
   return (
     <>
-      <Field
-        field="guestCount"
-        label="How many guests?"
-        hint="A rough number is fine. You can change it later."
-        error={errors.guestCount}
-      >
-        {(control) => (
-          <Input
-            {...control}
-            inputMode="numeric"
-            autoComplete="off"
-            value={values.guestCount}
-            className="sm:max-w-xs"
-            onChange={(event) => set("guestCount", event.target.value)}
-          />
-        )}
-      </Field>
-
-      <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
-        <div className="sm:col-span-2">
-          <Field
-            field="budgetAmount"
-            label="Total budget"
-            hint="Everything included, in whole amounts."
-            error={errors.budgetAmount}
-          >
-            {(control) => (
-              <Input
-                {...control}
-                inputMode="decimal"
-                autoComplete="off"
-                value={values.budgetAmount}
-                onChange={(event) => set("budgetAmount", event.target.value)}
-              />
-            )}
-          </Field>
-        </div>
-        <Field field="currency" label="Currency" error={errors.currency}>
+      {/* Paired fields share one grid; each has a hint so the controls in a row line up. */}
+      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+        <Field
+          field="guestCount"
+          label="How many guests?"
+          hint="A rough number is fine."
+          error={errors.guestCount}
+        >
+          {(control) => (
+            <Input
+              {...control}
+              inputMode="numeric"
+              autoComplete="off"
+              value={values.guestCount}
+              onChange={(event) => set("guestCount", event.target.value)}
+            />
+          )}
+        </Field>
+        <Field
+          field="location"
+          label="City or region"
+          hint="No street address needed."
+          optional
+          error={errors.location}
+        >
+          {(control) => (
+            <Input
+              {...control}
+              value={values.location}
+              maxLength={80}
+              autoComplete="address-level2"
+              onChange={(event) => set("location", event.target.value)}
+            />
+          )}
+        </Field>
+        <Field
+          field="budgetAmount"
+          label="Total budget"
+          hint="Everything included."
+          error={errors.budgetAmount}
+        >
+          {(control) => (
+            <Input
+              {...control}
+              inputMode="decimal"
+              autoComplete="off"
+              value={values.budgetAmount}
+              onChange={(event) => set("budgetAmount", event.target.value)}
+            />
+          )}
+        </Field>
+        <Field field="currency" label="Currency" hint="What you'll pay in." error={errors.currency}>
           {(control) => (
             <NativeSelect
               {...control}
@@ -74,25 +88,6 @@ export function GuestsStep({ values, errors, set }: StepProps) {
           )}
         </Field>
       </div>
-
-      <Field
-        field="location"
-        label="City or region"
-        hint="The city or region only, not a street address."
-        optional
-        error={errors.location}
-      >
-        {(control) => (
-          <Input
-            {...control}
-            value={values.location}
-            maxLength={80}
-            autoComplete="address-level2"
-            className="sm:max-w-md"
-            onChange={(event) => set("location", event.target.value)}
-          />
-        )}
-      </Field>
 
       <FieldGroup field="hasVenue" legend="Do you already have a venue?">
         <RadioRow

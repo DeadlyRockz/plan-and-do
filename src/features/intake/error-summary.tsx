@@ -4,6 +4,8 @@ import { WarningOctagonIcon } from "@phosphor-icons/react/ssr";
 import { useEffect, useRef } from "react";
 import { focusField } from "@/lib/focus";
 import { fieldId, type FieldErrors, type FieldName } from "./form-model";
+import { SPACE, TYPE } from "@/components/styles";
+import { cn } from "cn";
 
 /**
  * Lists every error at the top of the form and takes focus when it appears, so keyboard and
@@ -24,11 +26,14 @@ export function ErrorSummary({ errors, attempt }: { errors: FieldErrors; attempt
       tabIndex={-1}
       role="alert"
       aria-labelledby="error-summary-title"
-      className="rounded-xl border border-destructive bg-card p-4 outline-none focus-visible:ring-3 focus-visible:ring-ring/50 sm:p-6"
+      className={cn(
+        "rounded-xl border border-destructive bg-card outline-none focus-visible:ring-3 focus-visible:ring-ring/50 sm:rounded-2xl",
+        SPACE.surface,
+      )}
     >
       <h3
         id="error-summary-title"
-        className="flex items-center gap-2 text-base font-semibold text-destructive"
+        className={cn(TYPE.cardTitle, "flex items-center gap-2 text-destructive")}
       >
         <WarningOctagonIcon size={20} weight="bold" aria-hidden="true" />
         {entries.length === 1 ? "There is a problem" : `There are ${entries.length} problems`}

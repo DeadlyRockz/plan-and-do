@@ -22,6 +22,8 @@ import { planStore, usePlans } from "@/lib/plan-store";
 import type { SavedPlan } from "@/lib/storage";
 import { EVENT_TYPE_ICONS, eventTitle } from "@/features/shared/event-meta";
 import { useStorageNotices } from "@/features/shared/storage-notices";
+import { SPACE, TYPE } from "@/components/styles";
+import { cn } from "cn";
 
 /** Saved plans in this browser, newest first (plan/08 §8.1 S3). */
 export function SavedPlansList() {
@@ -58,13 +60,18 @@ function SavedPlanRow({ plan }: { plan: SavedPlan }) {
     });
   };
   return (
-    <li className="flex flex-col gap-4 rounded-xl border bg-card p-4 sm:flex-row sm:items-center sm:justify-between sm:rounded-2xl sm:p-6">
+    <li
+      className={cn(
+        "flex flex-col gap-4 rounded-xl border bg-card sm:flex-row sm:items-center sm:justify-between sm:rounded-2xl",
+        SPACE.surface,
+      )}
+    >
       <div className="flex gap-4">
         <span className="flex size-11 shrink-0 items-center justify-center rounded-lg bg-accent text-accent-foreground">
           <TypeIcon size={22} weight="duotone" aria-hidden="true" />
         </span>
         <div className="flex flex-col gap-1.5">
-          <h2 className="text-base leading-tight font-semibold">
+          <h2 className={TYPE.cardTitle}>
             <Link
               href={`/plan/${plan.id}`}
               className="rounded-sm outline-none hover:underline focus-visible:ring-3 focus-visible:ring-ring/50"
@@ -121,15 +128,20 @@ function SavedPlanRow({ plan }: { plan: SavedPlan }) {
 
 function EmptyState() {
   return (
-    <div className="flex flex-col items-start gap-4 rounded-2xl border border-dashed p-6 sm:rounded-3xl sm:p-10">
+    <div
+      className={cn(
+        "flex flex-col items-start gap-4 rounded-xl border border-dashed sm:rounded-2xl",
+        SPACE.surface,
+      )}
+    >
       <FolderOpenIcon
         size={40}
         weight="duotone"
         aria-hidden="true"
         className="text-muted-foreground"
       />
-      <h2 className="text-lg leading-tight font-semibold sm:text-xl">No saved plans yet</h2>
-      <p className="max-w-prose text-sm text-muted-foreground">
+      <h2 className={TYPE.groupTitle}>No saved plans yet</h2>
+      <p className={cn(TYPE.secondary, "max-w-prose")}>
         Every plan you make is saved here automatically, in this browser.
       </p>
       <Link href="/#plan-form-title" className={buttonVariants()}>

@@ -5,6 +5,7 @@ import { cn } from "cn";
 import { Dialog as SheetPrimitive } from "radix-ui";
 import { XIcon } from "@phosphor-icons/react";
 import { Button } from "@/components/ui/button";
+import { TYPE } from "@/components/styles";
 
 const Sheet = SheetPrimitive.Root;
 const SheetTrigger = SheetPrimitive.Trigger;
@@ -38,12 +39,7 @@ function SheetContent({
 }
 
 function SheetTitle({ className, ...props }: React.ComponentProps<typeof SheetPrimitive.Title>) {
-  return (
-    <SheetPrimitive.Title
-      className={cn("pr-12 text-lg leading-tight font-semibold", className)}
-      {...props}
-    />
-  );
+  return <SheetPrimitive.Title className={cn(TYPE.groupTitle, "pr-12", className)} {...props} />;
 }
 
 function SheetDescription({

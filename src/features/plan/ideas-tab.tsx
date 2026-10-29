@@ -12,6 +12,7 @@ import { Notice } from "@/features/shared/notice";
 import { useCountdown } from "@/features/shared/use-countdown";
 import { GroupHeading, PanelHeading } from "./panel-heading";
 import type { IdeasState } from "./use-ideas";
+import { SPACE, TYPE } from "@/components/styles";
 
 /** Claude's ideas, with every state the call can be in (plan/08 §8.1, rule 9.8). */
 export function IdeasTab({ state, budget, onRefresh }: { state: IdeasState; budget: Budget; onRefresh: () => void }) {
@@ -54,16 +55,16 @@ function IdeasContent({ ideas, budget }: { ideas: PlanIdeas; budget: Budget }) {
   const featured = ideas.themes.length === 3;
   return (
     <>
-      <p className="max-w-prose text-base lg:text-lg">{ideas.summary}</p>
+      <p className={TYPE.lead}>{ideas.summary}</p>
 
       <section aria-labelledby="themes-title" className="flex flex-col gap-4">
         <GroupHeading id="themes-title">Themes</GroupHeading>
         <ul className="grid grid-cols-1 gap-4 md:grid-cols-2">
           {ideas.themes.map((theme, index) => (
             <li key={theme.name} className={cn(featured && index === 0 && "md:col-span-2")}>
-              <Card className="h-full gap-4 sm:p-5">
+              <Card className="h-full">
                 <div className="flex flex-wrap items-center justify-between gap-2">
-                  <h4 className="text-base leading-tight font-semibold">{theme.name}</h4>
+                  <h4 className={TYPE.cardTitle}>{theme.name}</h4>
                   <Badge variant={theme.budgetFit === "fits" ? "primary" : "warning"}>
                     {theme.budgetFit === "fits" ? "Fits your budget" : "Stretches the budget"}
                   </Badge>
@@ -85,7 +86,7 @@ function IdeasContent({ ideas, budget }: { ideas: PlanIdeas; budget: Budget }) {
           <GroupHeading id="saving-title">Ways to save</GroupHeading>
           <ul className="flex flex-col divide-y rounded-xl border bg-card sm:rounded-2xl">
             {ideas.savingIdeas.map((idea) => (
-              <li key={`${idea.budgetLineId}-${idea.idea}`} className="flex flex-col gap-2 p-4 sm:flex-row sm:items-start sm:gap-4">
+              <li key={`${idea.budgetLineId}-${idea.idea}`} className={cn("flex flex-col gap-2 sm:flex-row sm:items-start sm:gap-4", SPACE.row)}>
                 <Badge className="sm:mt-0.5">{budget.lines.find((line) => line.id === idea.budgetLineId)?.label}</Badge>
                 <span className="text-sm">{idea.idea}</span>
               </li>

@@ -15,6 +15,7 @@ import {
 import { EVENT_TYPE_DESCRIPTIONS, EVENT_TYPE_ICONS } from "@/features/shared/event-meta";
 import { Field, FieldGroup } from "./field";
 import type { StepProps } from "./step-props";
+import { TYPE } from "@/components/styles";
 
 export function EventStep({ values, errors, set, today }: StepProps) {
   const subtypes = values.eventType ? SUBTYPES[values.eventType] : [];
@@ -39,7 +40,7 @@ export function EventStep({ values, errors, set, today }: StepProps) {
                   <TypeIcon size={22} weight="duotone" aria-hidden="true" />
                 </span>
                 <span className="flex flex-col gap-1">
-                  <span className="text-base font-semibold">{EVENT_TYPE_LABELS[type]}</span>
+                  <span className={TYPE.cardTitle}>{EVENT_TYPE_LABELS[type]}</span>
                   <span className="text-sm text-muted-foreground group-data-[state=checked]:text-accent-foreground">
                     {EVENT_TYPE_DESCRIPTIONS[type]}
                   </span>
@@ -54,7 +55,7 @@ export function EventStep({ values, errors, set, today }: StepProps) {
         <Field
           field="subtype"
           label="What kind?"
-          hint={values.eventType ? undefined : "Choose what you're planning first."}
+          hint={values.eventType ? "Pick the closest match." : "Choose what you're planning first."}
           error={errors.subtype}
         >
           {(control) => (

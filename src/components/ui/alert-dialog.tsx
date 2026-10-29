@@ -4,6 +4,7 @@ import * as React from "react";
 import { cn } from "cn";
 import { AlertDialog as AlertDialogPrimitive } from "radix-ui";
 import { buttonVariants } from "@/components/ui/button";
+import { TYPE } from "@/components/styles";
 
 const AlertDialog = AlertDialogPrimitive.Root;
 const AlertDialogTrigger = AlertDialogPrimitive.Trigger;
@@ -30,12 +31,7 @@ function AlertDialogTitle({
   className,
   ...props
 }: React.ComponentProps<typeof AlertDialogPrimitive.Title>) {
-  return (
-    <AlertDialogPrimitive.Title
-      className={cn("text-lg leading-tight font-semibold", className)}
-      {...props}
-    />
-  );
+  return <AlertDialogPrimitive.Title className={cn(TYPE.groupTitle, className)} {...props} />;
 }
 
 function AlertDialogDescription({

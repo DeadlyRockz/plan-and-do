@@ -14,6 +14,7 @@ import { INITIAL_VALUES, STEPS, validate, type FieldErrors, type FormValues } fr
 import { GuestsStep } from "./guests-step";
 import { PreferencesStep } from "./preferences-step";
 import type { SetField } from "./step-props";
+import { TYPE } from "@/components/styles";
 
 const STEP_COMPONENTS = [EventStep, GuestsStep, PreferencesStep];
 const LAST_STEP = STEPS.length - 1;
@@ -97,7 +98,10 @@ export function IntakeForm() {
         <legend
           ref={legendRef}
           tabIndex={-1}
-          className="mb-3 rounded-md text-lg leading-tight font-semibold outline-none focus-visible:ring-3 focus-visible:ring-ring/50 sm:text-xl"
+          className={cn(
+            TYPE.groupTitle,
+            "mb-3 rounded-md outline-none focus-visible:ring-3 focus-visible:ring-ring/50",
+          )}
         >
           <span className="sr-only">{`Step ${step + 1} of ${STEPS.length}: `}</span>
           {current.title}
@@ -119,7 +123,7 @@ export function IntakeForm() {
         ) : (
           <span aria-hidden="true" />
         )}
-        <Button type="submit" size="lg" disabled={!today || isSaving}>
+        <Button type="submit" disabled={!today || isSaving}>
           {step < LAST_STEP ? "Next" : isSaving ? "Building your plan" : "Build my plan"}
           <ArrowRightIcon size={18} aria-hidden="true" />
         </Button>

@@ -10,6 +10,8 @@ import { formatDate, formatMoney } from "@/lib/format";
 import { EVENT_TYPE_LABELS } from "@/domain/event-types";
 import { SEVERITY_STATUS, StatusBadge } from "@/features/shared/status-badges";
 import { GroupHeading, PanelHeading } from "./panel-heading";
+import { SPACE, TYPE } from "@/components/styles";
+import { cn } from "cn";
 
 type OverviewProps = {
   brief: EventBrief;
@@ -28,7 +30,7 @@ export function OverviewTab({ brief, skeleton, summary, doneMilestones, today, o
   return (
     <div className="flex flex-col gap-8">
       <PanelHeading>Overview</PanelHeading>
-      <p className="max-w-prose text-base lg:text-lg">{summary ?? rulesSummary(brief, skeleton)}</p>
+      <p className={TYPE.lead}>{summary ?? rulesSummary(brief, skeleton)}</p>
 
       <section aria-labelledby="warnings-title" className="flex flex-col gap-4">
         <GroupHeading id="warnings-title">Worth your attention</GroupHeading>
@@ -50,7 +52,7 @@ export function OverviewTab({ brief, skeleton, summary, doneMilestones, today, o
         ) : (
           <ol className="flex flex-col divide-y rounded-xl border bg-card sm:rounded-2xl">
             {nextUp.map((milestone) => (
-              <li key={milestone.id} className="flex flex-wrap items-center justify-between gap-2 p-4">
+              <li key={milestone.id} className={cn("flex flex-wrap items-center justify-between gap-2", SPACE.row)}>
                 <span className="font-medium">{milestone.title}</span>
                 <span className="flex items-center gap-2 text-sm text-muted-foreground tabular-nums">
                   {milestone.due < today && <Badge variant="destructive">Overdue</Badge>}
@@ -74,10 +76,10 @@ export function OverviewTab({ brief, skeleton, summary, doneMilestones, today, o
 function WarningItem({ warning }: { warning: Warning }) {
   return (
     <li>
-      <Card className="gap-2 sm:p-5">
+      <Card>
         <div className="flex flex-wrap items-center gap-2">
           <StatusBadge status={SEVERITY_STATUS[warning.severity]} />
-          <h4 className="text-base font-semibold">{warning.title}</h4>
+          <h4 className={TYPE.cardTitle}>{warning.title}</h4>
         </div>
         <p className="text-sm text-muted-foreground">{warning.reason}</p>
         <p className="text-sm">{warning.suggestion}</p>
