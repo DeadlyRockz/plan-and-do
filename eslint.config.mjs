@@ -44,7 +44,12 @@ const eslintConfig = defineConfig([
     },
   },
   {
-    files: ["src/ai/claude-planner-ai.ts", "scripts/**"],
+    // The adapter, its own test (which needs the SDK's error classes) and the manual eval script.
+    files: [
+      "src/ai/claude-planner-ai.ts",
+      "src/ai/__tests__/claude-planner-ai.test.ts",
+      "scripts/**",
+    ],
     rules: { "@typescript-eslint/no-restricted-imports": "off" },
   },
   {
