@@ -28,10 +28,6 @@ export function toMajorUnits(minor: number): number {
   return minor / MINOR_PER_MAJOR;
 }
 
-export function localeForCurrency(currency: Currency): string {
-  return LOCALE_BY_CURRENCY[currency];
-}
-
 /** "₹12,00,000" for whole amounts, "₹1,234.50" when there are minor units. */
 export function formatMoney({ minor, currency }: Money): string {
   const hasFraction = minor % MINOR_PER_MAJOR !== 0;

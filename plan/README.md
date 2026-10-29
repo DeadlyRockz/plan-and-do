@@ -63,7 +63,13 @@ together with [`../engineering-rules/`](../engineering-rules/) before writing co
 
 ## Status
 
-| Item      | State                  |
-| --------- | ---------------------- |
-| Plan      | Drafted 2026-10-29     |
-| Phase 0–8 | Not started            |
+| Item      | State                                                                                   |
+| --------- | --------------------------------------------------------------------------------------- |
+| Plan      | Drafted 2026-10-29                                                                      |
+| Phase 0–2 | Done: scaffold, CI, decision engine, AI port, mock adapter, routes                      |
+| Phase 3   | Done in code and against a fake client; the live check waits for a key (`npm run eval:ai`) |
+| Phase 4–7 | Done: UI, refine, `.ics`, print, progress, CSP, E2E with axe, Lighthouse                |
+| Phase 8   | README and `scripts/presubmit.sh` done; not yet submitted                               |
+
+Deviations from this plan are recorded in [`docs/adr/0001`](../docs/adr/0001-tech-stack.md) and
+[`docs/adr/0002`](../docs/adr/0002-hybrid-rules-and-llm.md).

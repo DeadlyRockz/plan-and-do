@@ -8,12 +8,6 @@ export const SUBTYPES = {
 } as const satisfies Record<EventType, readonly string[]>;
 export type Subtype = (typeof SUBTYPES)[EventType][number];
 
-export const ALL_SUBTYPES = [
-  ...SUBTYPES.wedding,
-  ...SUBTYPES.birthday,
-  ...SUBTYPES.community,
-] as const;
-
 export const SETTINGS = ["indoor", "outdoor", "either"] as const;
 export type Setting = (typeof SETTINGS)[number];
 

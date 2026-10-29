@@ -25,7 +25,7 @@ import { clientKey, type DailyCap, type SlidingWindowLimiter } from "./rate-limi
 import type { LruCache } from "./response-cache";
 import { resolveToday } from "./today";
 
-export type IdeasResponseBody = {
+type IdeasResponseBody = {
   ideas: PlanIdeas;
   meta: { model: string; adapter: string; cached: boolean; promptVersion: string };
 };

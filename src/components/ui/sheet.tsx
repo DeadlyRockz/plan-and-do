@@ -8,7 +8,6 @@ import { Button } from "@/components/ui/button";
 
 const Sheet = SheetPrimitive.Root;
 const SheetTrigger = SheetPrimitive.Trigger;
-const SheetClose = SheetPrimitive.Close;
 
 /** A bottom sheet for narrow screens. Radix traps focus and returns it to the trigger on close. */
 function SheetContent({
@@ -59,4 +58,4 @@ function SheetDescription({
   );
 }
 
-export { Sheet, SheetTrigger, SheetClose, SheetContent, SheetTitle, SheetDescription };
+export { Sheet, SheetTrigger, SheetContent, SheetTitle, SheetDescription };

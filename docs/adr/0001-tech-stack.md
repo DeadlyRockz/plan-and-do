@@ -31,7 +31,10 @@
    loosening `script-src` to `'unsafe-inline'`.
 3. **CSP is set in `src/proxy.ts`.** Next 16 renamed `middleware` to `proxy`. The static security
    headers stay in `next.config.ts`.
-4. **`@types/node` 24.** Vitest 5 requires Node types 22 or newer; we match the Node 24 runtime.
+4. **A `TRUST_PROXY` setting.** plan/09 §9.4 reads the client IP from `x-forwarded-for` "when
+   behind a known proxy". Without a proxy that header is client-controlled, so the app only
+   trusts it when `TRUST_PROXY=true`; otherwise every client shares one rate-limit bucket.
+5. **`@types/node` 24.** Vitest 5 requires Node types 22 or newer; we match the Node 24 runtime.
 
 ## Consequences
 
