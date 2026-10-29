@@ -12,7 +12,7 @@ export function SiteHeader() {
           className="flex min-h-11 items-center gap-2 rounded-lg text-lg font-semibold tracking-tight outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
         >
           <BrandMark />
-          Occasio
+          Plan and Do
         </Link>
         <nav aria-label="Main" className="flex items-center gap-1">
           <Link

@@ -125,7 +125,7 @@ function PlanDetails({ plan, today }: { plan: SavedPlan; today: IsoDate }) {
 
   return (
     <main id="main" tabIndex={-1} className="outline-none">
-      <title>{`${title} | Occasio`}</title>
+      <title>{`${title} | Plan and Do`}</title>
       <PageContainer className={cn("flex flex-col gap-8", SPACE.pageY)}>
         <PlanHeader title={title} brief={plan.brief} context={skeleton.context} today={today} onDelete={deletePlan} />
         {isPast && (

@@ -1,9 +1,9 @@
-# Occasio: Project Plan
+# Plan and Do: Project Plan
 
-**Occasio** (working name, rename freely) is our entry for **Challenge 5: Celebration & Event
-Planner**. It is a GenAI planning assistant: it takes a short event brief and returns a budget,
-a timeline, a vendor checklist and personalised ideas for weddings, birthdays and community
-events. Users can then refine the plan by chatting with it.
+**Plan and Do** is our entry for **Challenge 5: Celebration & Event Planner**. It is a GenAI
+planning assistant: it takes a short event brief and returns a budget, a timeline, a vendor
+checklist and personalised ideas for weddings, birthdays and community events. Users can then
+refine the plan by chatting with it.
 
 The build follows this folder. Whoever does the build, human or AI coding agent, MUST read it
 together with [`../engineering-rules/`](../engineering-rules/) before writing code.

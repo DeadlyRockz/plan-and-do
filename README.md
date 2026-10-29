@@ -1,16 +1,16 @@
-# Occasio
+# Plan and Do
 
 A GenAI planning assistant for weddings, birthdays and community events. Describe the event in a
 two-minute form and get a budget split, a dated timeline, a vendor checklist and personalised
 ideas. Then change the plan by talking to it.
 
-![The Occasio home page: a headline and a live sample plan](docs/screenshots/home.webp)
+![The Plan and Do home page: a headline and a live sample plan](docs/screenshots/home.webp)
 
 ## 1. Chosen vertical
 
 **Celebration & Event Planner (Challenge 5).**
 
-Occasio is for people who plan an event without a professional planner:
+Plan and Do is for people who plan an event without a professional planner:
 
 - **First-time hosts** planning a wedding or a milestone birthday, who need to know what to do
   and when, where the money should go and which vendors to book.

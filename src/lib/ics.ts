@@ -21,12 +21,12 @@ export function buildCalendar(
   const lines = [
     "BEGIN:VCALENDAR",
     "VERSION:2.0",
-    "PRODID:-//Occasio//Event planner//EN",
+    "PRODID:-//Plan and Do//Event planner//EN",
     "CALSCALE:GREGORIAN",
     "METHOD:PUBLISH",
     ...entries.flatMap((entry) => [
       "BEGIN:VEVENT",
-      `UID:${calendarId}-${entry.id}@occasio`,
+      `UID:${calendarId}-${entry.id}@plan-and-do`,
       `DTSTAMP:${stamp}`,
       `DTSTART;VALUE=DATE:${compact(entry.date)}`,
       `DTEND;VALUE=DATE:${compact(addDays(entry.date, 1))}`,

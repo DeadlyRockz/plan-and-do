@@ -12,7 +12,7 @@ import "./globals.css";
 const geist = Geist({ variable: "--font-geist-sans", subsets: ["latin"], display: "swap" });
 
 export const metadata: Metadata = {
-  title: { default: "Occasio: plan your celebration", template: "%s | Occasio" },
+  title: { default: "Plan and Do: organise your celebration", template: "%s | Plan and Do" },
   description:
     "A planning assistant for weddings, birthdays and community events: a budget split, a dated timeline, a vendor checklist and ideas made for you.",
 };

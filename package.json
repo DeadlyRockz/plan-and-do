@@ -1,5 +1,5 @@
 {
-  "name": "occasio",
+  "name": "plan-and-do",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -56,7 +56,7 @@
     "typescript": "^5",
     "vitest": "^5.0.5"
   },
-  "description": "Occasio: a GenAI planning assistant for weddings, birthdays and community events.",
+  "description": "Plan and Do: a GenAI planning assistant for weddings, birthdays and community events.",
   "engines": {
     "node": ">=24 <25"
   }

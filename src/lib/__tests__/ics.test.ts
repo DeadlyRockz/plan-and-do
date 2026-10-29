@@ -23,7 +23,7 @@ describe("buildCalendar", () => {
   it("uses_crlf_line_endings_and_a_stable_uid", () => {
     expect([
       calendar.endsWith("END:VCALENDAR\r\n"),
-      calendar.includes("UID:plan-1-book-venue@occasio"),
+      calendar.includes("UID:plan-1-book-venue@plan-and-do"),
     ]).toEqual([true, true]);
   });
 
