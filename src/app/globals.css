@@ -8,7 +8,9 @@
  * Design tokens (engineering rule 9.4). One neutral ramp in OKLCH (hue 260), a green primary,
  * and a dark theme built to its own rules rather than by inverting the light one. Every colour
  * in the app is one of these tokens; src/styles/__tests__/theme-tokens.test.ts checks each
- * text and UI pair against WCAG 2.1 AA in both themes. Radii use Tailwind's default scale:
+ * text and UI pair against WCAG 2.1 AA in both themes. There is a single border colour, used for
+ * cards, dividers, tables and form fields alike, at 3:1 so fields stay identifiable (WCAG
+ * 1.4.11). Radii use Tailwind's default scale:
  * controls rounded-md sm:rounded-lg, cards rounded-xl sm:rounded-2xl, containers 2xl/3xl,
  * status pills rounded-full (rule 9.6).
  */
@@ -33,7 +35,6 @@
   --color-warning: var(--warning);
   --color-warning-foreground: var(--warning-foreground);
   --color-border: var(--border);
-  --color-input: var(--input);
   --color-ring: var(--ring);
   --color-overlay: var(--overlay);
   --color-chart-1: var(--chart-1);
@@ -63,8 +64,8 @@
   --destructive-foreground: oklch(0.985 0.002 260);
   --warning: oklch(0.52 0.155 47);
   --warning-foreground: oklch(0.985 0.002 260);
-  --border: oklch(0.91 0.005 260);
-  --input: oklch(0.6 0.012 260);
+  /* One border colour for everything: the lightest grey that keeps form fields at 3:1. */
+  --border: oklch(0.64 0.012 260);
   --ring: oklch(0.521 0.135 150);
   --overlay: oklch(0.17 0.012 260 / 0.55);
   --chart-1: oklch(0.521 0.135 150);
@@ -94,8 +95,7 @@
   --destructive-foreground: oklch(0.17 0.02 25);
   --warning: oklch(0.829 0.171 81);
   --warning-foreground: oklch(0.2 0.03 81);
-  --border: oklch(0.33 0.009 260);
-  --input: oklch(0.56 0.012 260);
+  --border: oklch(0.55 0.012 260);
   --ring: oklch(0.72 0.175 150);
   --overlay: oklch(0.1 0.006 260 / 0.7);
   --chart-1: oklch(0.72 0.175 150);

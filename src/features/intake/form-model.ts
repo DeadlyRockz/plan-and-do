@@ -80,7 +80,7 @@ export function toBriefInput(values: FormValues): Record<string, unknown> {
     eventType: values.eventType || undefined,
     subtype: values.subtype,
     eventName: text(values.eventName),
-    eventDate: values.eventDate,
+    eventDate: values.eventDate || undefined,
     guestCount: toNumber(values.guestCount),
     budget: { amount: toNumber(values.budgetAmount), currency: values.currency },
     location: text(values.location),

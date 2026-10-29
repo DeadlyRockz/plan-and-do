@@ -1,6 +1,7 @@
 "use client";
 
 import { RadioGroup as RadioGroupPrimitive } from "radix-ui";
+import { DatePicker } from "@/components/ui/date-picker";
 import { Input } from "@/components/ui/input";
 import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select";
 import { addYears } from "@/domain/dates";
@@ -32,7 +33,7 @@ export function EventStep({ values, errors, set, today }: StepProps) {
               <RadioGroupPrimitive.Item
                 key={type}
                 value={type}
-                className="group flex min-h-11 items-start gap-3 rounded-xl border bg-card p-4 text-left transition-colors outline-none hover:border-input focus-visible:ring-3 focus-visible:ring-ring/50 data-[state=checked]:border-primary data-[state=checked]:bg-accent sm:flex-col sm:rounded-2xl"
+                className="group flex min-h-11 items-start gap-3 rounded-xl border bg-card p-4 text-left transition-colors outline-none focus-visible:ring-3 focus-visible:ring-ring/50 data-[state=checked]:border-primary data-[state=checked]:bg-accent sm:flex-col sm:rounded-2xl"
               >
                 <span className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-muted text-foreground group-data-[state=checked]:bg-primary group-data-[state=checked]:text-primary-foreground">
                   <TypeIcon size={22} weight="duotone" aria-hidden="true" />
@@ -80,13 +81,13 @@ export function EventStep({ values, errors, set, today }: StepProps) {
           error={errors.eventDate}
         >
           {(control) => (
-            <Input
+            <DatePicker
               {...control}
-              type="date"
+              labelId={`${control.id}-label`}
               value={values.eventDate}
               min={today}
               max={today ? addYears(today, 3) : undefined}
-              onChange={(event) => set("eventDate", event.target.value)}
+              onChange={(date) => set("eventDate", date)}
             />
           )}
         </Field>

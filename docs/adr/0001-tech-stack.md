@@ -34,7 +34,16 @@
 4. **A `TRUST_PROXY` setting.** plan/09 §9.4 reads the client IP from `x-forwarded-for` "when
    behind a known proxy". Without a proxy that header is client-controlled, so the app only
    trusts it when `TRUST_PROXY=true`; otherwise every client shares one rate-limit bucket.
-5. **`@types/node` 24.** Vitest 5 requires Node types 22 or newer; we match the Node 24 runtime.
+5. **The shadcn date picker.** At the owner's request the event date uses shadcn/ui's date picker
+   (a popover calendar on `react-day-picker`, which brings `date-fns` with it) instead of the
+   native date input. plan/03 §3.3 avoided date libraries for bundle size, so the calendar is
+   loaded with `next/dynamic` only when the picker first opens. The domain still does its own
+   date maths in `src/domain/dates.ts`.
+6. **One border colour.** At the owner's request every border (cards, dividers, tables and form
+   fields) uses the single `--border` token, set to the lightest grey that keeps form fields at
+   3:1 against the canvas, cards and popovers in both themes (WCAG 1.4.11). The separate
+   `--input` token is gone; state borders (selected, error, warning, focus) keep their colours.
+7. **`@types/node` 24.** Vitest 5 requires Node types 22 or newer; we match the Node 24 runtime.
 
 ## Consequences
 

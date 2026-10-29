@@ -36,8 +36,10 @@ const TEXT_PAIRS: Pair[] = [
 const UI_PAIRS: Pair[] = [
   ["ring", "background"],
   ["ring", "card"],
-  ["input", "background"],
-  ["input", "card"],
+  // The single border colour outlines form fields too, so it must hold 3:1 (WCAG 1.4.11).
+  ["border", "background"],
+  ["border", "card"],
+  ["border", "popover"],
   ["primary", "accent"],
   ["chart-1", "card"],
   ["chart-2", "card"],

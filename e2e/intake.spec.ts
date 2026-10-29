@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { expectAccessible, fixClock, isoDaysFromToday } from "./helpers";
+import { expectAccessible, fixClock } from "./helpers";
 
 test.beforeEach(async ({ page }) => fixClock(page));
 
@@ -14,8 +14,8 @@ test("error_summary_focuses_and_links_to_invalid_fields", async ({ page }) => {
   await page.getByRole("button", { name: "Next", exact: true }).click();
   const summary = page.getByRole("alert", { name: /problems/ });
   await expect(summary).toBeFocused();
-  await summary.getByRole("link", { name: "Enter a real date, like 2027-03-14." }).click();
-  await expect(page.getByLabel("Event date")).toBeFocused();
+  await summary.getByRole("link", { name: "Enter the event date." }).click();
+  await expect(page.getByLabel(/Event date/)).toBeFocused();
   await expectAccessible(page, "intake with errors");
 });
 
@@ -36,12 +36,17 @@ test("intake_form_completes_with_keyboard_only", async ({ page }) => {
   await page.keyboard.press("Tab");
   await expect(page.getByLabel("What kind?")).toBeFocused();
   await page.keyboard.type("Teen");
+  // The date picker opens with Enter; PageDown moves a month on and Enter picks that day.
   await page.keyboard.press("Tab");
-  // The date control's segment order follows the OS locale, so set its value without a pointer
-  // rather than typing digits in a locale-specific order.
-  const date = page.getByLabel("Event date");
+  const date = page.getByLabel(/Event date/);
   await expect(date).toBeFocused();
-  await date.fill(isoDaysFromToday(40));
+  await page.keyboard.press("Enter");
+  await expect(page.getByRole("grid")).toBeVisible();
+  await page.keyboard.press("PageDown");
+  await page.keyboard.press("Enter");
+  await expect(date).toBeFocused();
+  await expect(date).not.toContainText("Pick a date");
+  await page.keyboard.press("Tab");
   await page.keyboard.press("Enter");
 
   // Step 2: Enter in a field submits the step.
@@ -67,4 +72,11 @@ test("no_horizontal_scroll_at_320px", async ({ page }) => {
     () => document.documentElement.scrollWidth - window.innerWidth,
   );
   expect(overflow).toBeLessThanOrEqual(0);
+});
+
+test("date_picker_is_accessible_when_open", async ({ page }) => {
+  await page.goto("/");
+  await page.getByLabel(/Event date/).click();
+  await expect(page.getByRole("grid")).toBeVisible();
+  await expectAccessible(page, "open date picker");
 });

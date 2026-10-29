@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { IntakeForm } from "../intake-form";
@@ -28,7 +28,7 @@ describe("IntakeForm", () => {
     const user = userEvent.setup();
     render(<IntakeForm />);
     await user.click(screen.getByRole("button", { name: /next/i }));
-    const date = screen.getByLabelText("Event date");
+    const date = screen.getByLabelText(/Event date/);
     expect([date.getAttribute("aria-invalid"), date.getAttribute("aria-describedby")]).toEqual([
       "true",
       "field-eventDate-hint field-eventDate-error",
@@ -40,9 +40,12 @@ describe("IntakeForm", () => {
     render(<IntakeForm />);
     await user.click(screen.getByRole("radio", { name: /birthday/i }));
     await user.selectOptions(screen.getByLabelText("What kind?"), "child");
-    const date = new Date();
-    date.setDate(date.getDate() + 30);
-    await user.type(screen.getByLabelText("Event date"), date.toISOString().slice(0, 10));
+    await user.click(screen.getByLabelText(/Event date/));
+    const grid = await screen.findByRole("grid");
+    const enabledDays = within(grid)
+      .getAllByRole("button")
+      .filter((day) => !day.hasAttribute("disabled"));
+    await user.click(enabledDays.at(-1) as HTMLElement);
     await user.click(screen.getByRole("button", { name: /next/i }));
     expect(screen.getByText("Step 2 of 3")).toBeInTheDocument();
   });

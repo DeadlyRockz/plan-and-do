@@ -230,7 +230,7 @@ accessibility is 100.
 
 **Efficiency.** The plan needs no AI call to render. One Claude call covers all the ideas, cached
 on the server (LRU, 1 hour) and in the browser (by brief fingerprint); the system prompt is
-prompt-cached; chat uses low effort. Pages ship no chart or date library. Lighthouse on the home
+prompt-cached; chat uses low effort. Pages ship no chart library, and the date picker's calendar loads only when it is first opened. Lighthouse on the home
 page: performance 95 on mobile and 100 on desktop, CLS 0.
 
 ## 10. Project structure

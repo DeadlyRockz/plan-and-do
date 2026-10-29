@@ -24,7 +24,7 @@ export function Field({ field, label, hint, error, optional, children }: FieldPr
   const describedBy = [hint && `${id}-hint`, error && `${id}-error`].filter(Boolean).join(" ");
   return (
     <div className="flex flex-col gap-2">
-      <Label htmlFor={id}>
+      <Label htmlFor={id} id={`${id}-label`}>
         {label}
         {optional && <span className="font-normal text-muted-foreground"> (optional)</span>}
       </Label>

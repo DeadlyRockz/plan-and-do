@@ -40,6 +40,33 @@ export async function expectAccessible(page: Page, label: string): Promise<void>
   await page.emulateMedia({ colorScheme: "light" });
 }
 
+const MONTHS = [
+  "January",
+  "February",
+  "March",
+  "April",
+  "May",
+  "June",
+  "July",
+  "August",
+  "September",
+  "October",
+  "November",
+  "December",
+];
+
+/** Picks a date with the shadcn date picker: month and year dropdowns, then the day. */
+export async function pickDate(page: Page, iso: string): Promise<void> {
+  const [year, month, day] = iso.split("-").map(Number) as [number, number, number];
+  await page.getByLabel(/Event date/).click();
+  const calendar = page.getByRole("dialog");
+  await calendar.getByLabel("Choose the Year").selectOption(String(year));
+  await calendar.getByLabel("Choose the Month").selectOption(String(month - 1));
+  const name = new RegExp(`^${day} ${MONTHS[month - 1]} ${year},`);
+  await calendar.getByRole("button", { name }).click();
+  await expect(calendar).toBeHidden();
+}
+
 type Intake = {
   type: RegExp;
   subtype: string;
@@ -58,7 +85,7 @@ export async function createPlan(page: Page, intake: Intake): Promise<void> {
   await page.goto("/");
   await page.getByRole("radio", { name: intake.type }).click();
   await page.getByLabel("What kind?").selectOption({ label: intake.subtype });
-  await page.getByLabel("Event date").fill(isoDaysFromToday(intake.inDays));
+  await pickDate(page, isoDaysFromToday(intake.inDays));
   if (intake.name) await page.getByLabel(/Name of the event/).fill(intake.name);
   await page.getByRole("button", { name: "Next", exact: true }).click();
 
