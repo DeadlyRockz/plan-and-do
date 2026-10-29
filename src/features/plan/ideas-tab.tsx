@@ -15,7 +15,15 @@ import type { IdeasState } from "./use-ideas";
 import { SPACE, TYPE } from "@/components/styles";
 
 /** Claude's ideas, with every state the call can be in (plan/08 §8.1, rule 9.8). */
-export function IdeasTab({ state, budget, onRefresh }: { state: IdeasState; budget: Budget; onRefresh: () => void }) {
+export function IdeasTab({
+  state,
+  budget,
+  onRefresh,
+}: {
+  state: IdeasState;
+  budget: Budget;
+  onRefresh: () => void;
+}) {
   return (
     <div className="flex flex-col gap-6">
       <PanelHeading>Ideas</PanelHeading>
@@ -30,8 +38,8 @@ export function IdeasTab({ state, budget, onRefresh }: { state: IdeasState; budg
         <>
           {state.isDemo && (
             <Notice title="Demo mode: these are sample ideas">
-              The server has no Claude API key, so these come from fixed examples. Add a key for ideas
-              written for your event.
+              The server has no Claude API key, so these come from fixed examples. Add a key for
+              ideas written for your event.
             </Notice>
           )}
           {state.isStale && (
@@ -81,7 +89,12 @@ function IdeasContent({ ideas, budget }: { ideas: PlanIdeas; budget: Budget }) {
                   </Badge>
                 </div>
                 <p className="text-sm text-muted-foreground">{theme.description}</p>
-                <div className={cn("grid grid-cols-1 gap-4", featured && index === 0 && "sm:grid-cols-3")}>
+                <div
+                  className={cn(
+                    "grid grid-cols-1 gap-4",
+                    featured && index === 0 && "sm:grid-cols-3",
+                  )}
+                >
                   <IdeaList title="Decor" items={theme.decor} />
                   <IdeaList title="Food and drink" items={theme.foodAndDrink} />
                   <IdeaList title="Activities" items={theme.activities} />
@@ -140,7 +153,9 @@ function IdeaList({ title, items }: { title: string; items: readonly string[] })
 function IdeasSkeleton() {
   return (
     <div aria-busy="true" className="flex flex-col gap-4">
-      <p className="text-sm text-muted-foreground">Writing ideas for your event. Your plan is ready to use meanwhile.</p>
+      <p className="text-sm text-muted-foreground">
+        Writing ideas for your event. Your plan is ready to use meanwhile.
+      </p>
       <Skeleton className="h-6 w-3/4" />
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         <Skeleton className="h-56 rounded-xl sm:rounded-2xl md:col-span-2" />

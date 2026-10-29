@@ -69,7 +69,9 @@ function storedPlan(): SavedPlan | undefined {
 function respondWithIdeas(ideas: PlanIdeas) {
   const fetchIdeas = vi.fn<typeof fetch>(
     async () =>
-      new Response(JSON.stringify({ ideas, meta: { adapter: "claude", promptVersion: "ideas-v1" } })),
+      new Response(
+        JSON.stringify({ ideas, meta: { adapter: "claude", promptVersion: "ideas-v1" } }),
+      ),
   );
   vi.stubGlobal("fetch", fetchIdeas);
   return fetchIdeas;
@@ -167,10 +169,10 @@ describe("PlanView", () => {
     await user.click(screen.getByRole("tab", { name: "Vendors" }));
     const venue = screen.getByRole("heading", { level: 3, name: "Venue" }).closest("li");
     await user.click(within(venue as HTMLElement).getByLabelText("Booked"));
-    expect([
-      screen.getByText(/^1 of 6 booked/).tagName,
-      storedPlan()?.progress.vendors,
-    ]).toEqual(["P", ["venue"]]);
+    expect([screen.getByText(/^1 of 6 booked/).tagName, storedPlan()?.progress.vendors]).toEqual([
+      "P",
+      ["venue"],
+    ]);
   });
 
   it("exports_every_timeline_step_as_a_calendar_file", async () => {
@@ -298,7 +300,12 @@ describe("PlanView", () => {
 
   it("refreshes_out_of_date_ideas_on_request", async () => {
     savePlan(makeBrief(), {
-      ideas: { value: IDEAS, briefHash: "an-older-brief", promptVersion: "ideas-v1", adapter: "claude" },
+      ideas: {
+        value: IDEAS,
+        briefHash: "an-older-brief",
+        promptVersion: "ideas-v1",
+        adapter: "claude",
+      },
     });
     const fetchIdeas = respondWithIdeas({ ...IDEAS, summary: "Fresh ideas for 30 guests." });
     const user = userEvent.setup();

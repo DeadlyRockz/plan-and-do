@@ -63,7 +63,11 @@ export function BudgetTab({
                         </Badge>
                       )}
                     </span>
-                    {line.reason && <span className="mt-1 block text-sm text-muted-foreground">{line.reason}</span>}
+                    {line.reason && (
+                      <span className="mt-1 block text-sm text-muted-foreground">
+                        {line.reason}
+                      </span>
+                    )}
                     {saving && (
                       <span className="mt-1 block text-sm">
                         <span className="font-medium">To save: </span>
@@ -76,8 +80,12 @@ export function BudgetTab({
                       style={{ width: `${(line.basisPoints / largest) * 100}%` }}
                     />
                   </th>
-                  <td className="px-4 py-4 text-right tabular-nums">{formatShare(line.basisPoints)}</td>
-                  <td className="px-4 py-4 text-right font-medium tabular-nums sm:px-6">{formatMoney(line.amount)}</td>
+                  <td className="px-4 py-4 text-right tabular-nums">
+                    {formatShare(line.basisPoints)}
+                  </td>
+                  <td className="px-4 py-4 text-right font-medium tabular-nums sm:px-6">
+                    {formatMoney(line.amount)}
+                  </td>
                 </tr>
               );
             })}
@@ -88,15 +96,17 @@ export function BudgetTab({
                 Total
               </th>
               <td className="px-4 py-4 text-right tabular-nums">100%</td>
-              <td className="px-4 py-4 text-right tabular-nums sm:px-6">{formatMoney(budget.total)}</td>
+              <td className="px-4 py-4 text-right tabular-nums sm:px-6">
+                {formatMoney(budget.total)}
+              </td>
             </tr>
           </tfoot>
         </table>
       </div>
       <p className="flex gap-2 text-sm text-muted-foreground">
         <InfoIcon size={18} aria-hidden="true" className="shrink-0" />
-        Shares come from rules of thumb in common planning guides. Treat them as a starting point, not
-        quotes.
+        Shares come from rules of thumb in common planning guides. Treat them as a starting point,
+        not quotes.
       </p>
     </div>
   );

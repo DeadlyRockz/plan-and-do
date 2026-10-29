@@ -16,7 +16,13 @@ import type { IsoDate } from "@/domain/dates";
 import { EVENT_TYPE_LABELS } from "@/domain/event-types";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { formatCount, formatCountdown, formatDate, formatMoney, moneyFromMajor } from "@/lib/format";
+import {
+  formatCount,
+  formatCountdown,
+  formatDate,
+  formatMoney,
+  moneyFromMajor,
+} from "@/lib/format";
 import { DeletePlanDialog } from "@/features/shared/delete-plan";
 import { EVENT_TYPE_ICONS } from "@/features/shared/event-meta";
 import { MODE_STATUS, StatusBadge } from "@/features/shared/status-badges";
@@ -45,7 +51,10 @@ export function PlanHeader({ title, brief, context, today, onDelete }: PlanHeade
       <dl className="flex flex-wrap gap-x-6 gap-y-2 text-base">
         <Fact icon={CalendarBlankIcon} label="Date">
           {formatDate(brief.eventDate)}
-          <span className="text-muted-foreground"> ({formatCountdown(today, brief.eventDate)})</span>
+          <span className="text-muted-foreground">
+            {" "}
+            ({formatCountdown(today, brief.eventDate)})
+          </span>
         </Fact>
         <Fact icon={UsersIcon} label="Guests">
           {formatCount(brief.guestCount)} guests

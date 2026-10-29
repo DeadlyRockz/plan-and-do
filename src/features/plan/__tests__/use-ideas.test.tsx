@@ -12,7 +12,9 @@ vi.mock("@/lib/api-client", async (importOriginal) => ({
   requestIdeas: (...args: unknown[]) => requestIdeas(...args),
 }));
 const update = vi.fn();
-vi.mock("@/lib/plan-store", () => ({ planStore: { update: (...args: unknown[]) => update(...args) } }));
+vi.mock("@/lib/plan-store", () => ({
+  planStore: { update: (...args: unknown[]) => update(...args) },
+}));
 
 const brief = EventBriefSchema.parse({
   eventType: "birthday",
@@ -40,7 +42,12 @@ afterEach(() => {
 
 describe("useIdeas", () => {
   it("fetches_once_and_saves_ideas_for_a_plan_without_any", async () => {
-    requestIdeas.mockResolvedValue({ ok: true, ideas, adapter: "claude", promptVersion: "ideas-v1" });
+    requestIdeas.mockResolvedValue({
+      ok: true,
+      ideas,
+      adapter: "claude",
+      promptVersion: "ideas-v1",
+    });
     const { result } = renderHook(() => useIdeas(basePlan, "2026-10-29", false));
     expect(result.current.state.status).toBe("loading");
     await waitFor(() => expect(update).toHaveBeenCalledOnce());
@@ -63,7 +70,12 @@ describe("useIdeas", () => {
   });
 
   it("reports_an_error_with_a_retry_time", async () => {
-    requestIdeas.mockResolvedValue({ ok: false, code: "RATE_LIMITED", message: "Wait.", retryAfterSeconds: 20 });
+    requestIdeas.mockResolvedValue({
+      ok: false,
+      code: "RATE_LIMITED",
+      message: "Wait.",
+      retryAfterSeconds: 20,
+    });
     const { result } = renderHook(() => useIdeas(basePlan, "2026-10-29", false));
     await waitFor(() => expect(result.current.state.status).toBe("error"));
   });
@@ -71,7 +83,12 @@ describe("useIdeas", () => {
   it("marks_saved_ideas_stale_when_the_brief_changed", () => {
     const plan: SavedPlan = {
       ...basePlan,
-      ideas: { value: ideas, briefHash: briefFingerprint({ ...brief, guestCount: 99 }), promptVersion: "ideas-v1", adapter: "mock" },
+      ideas: {
+        value: ideas,
+        briefHash: briefFingerprint({ ...brief, guestCount: 99 }),
+        promptVersion: "ideas-v1",
+        adapter: "mock",
+      },
     };
     const { result } = renderHook(() => useIdeas(plan, "2026-10-29", false));
     expect([result.current.state, requestIdeas.mock.calls.length]).toEqual([

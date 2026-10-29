@@ -25,7 +25,14 @@ type OverviewProps = {
   onShowTimeline: () => void;
 };
 
-export function OverviewTab({ brief, skeleton, summary, doneMilestones, today, onShowTimeline }: OverviewProps) {
+export function OverviewTab({
+  brief,
+  skeleton,
+  summary,
+  doneMilestones,
+  today,
+  onShowTimeline,
+}: OverviewProps) {
   const nextUp = skeleton.milestones
     .filter((milestone) => !milestone.isPostEvent && !doneMilestones.includes(milestone.id))
     .slice(0, NEXT_UP_COUNT);
@@ -38,7 +45,9 @@ export function OverviewTab({ brief, skeleton, summary, doneMilestones, today, o
       <section aria-labelledby="warnings-title" className="flex flex-col gap-4">
         <GroupHeading id="warnings-title">Worth your attention</GroupHeading>
         {skeleton.warnings.length === 0 ? (
-          <p className="text-sm text-muted-foreground">Nothing needs attention right now. Your plan looks balanced.</p>
+          <p className="text-sm text-muted-foreground">
+            Nothing needs attention right now. Your plan looks balanced.
+          </p>
         ) : (
           <ul className="flex flex-col gap-3">
             {skeleton.warnings.map((warning) => (
@@ -51,11 +60,16 @@ export function OverviewTab({ brief, skeleton, summary, doneMilestones, today, o
       <section aria-labelledby="next-up-title" className="flex flex-col gap-4">
         <GroupHeading id="next-up-title">Next up</GroupHeading>
         {nextUp.length === 0 ? (
-          <p className="text-sm text-muted-foreground">Every step before the event is done. Enjoy the day.</p>
+          <p className="text-sm text-muted-foreground">
+            Every step before the event is done. Enjoy the day.
+          </p>
         ) : (
           <ol className="flex flex-col divide-y rounded-xl border bg-card sm:rounded-2xl">
             {nextUp.map((milestone) => (
-              <li key={milestone.id} className={cn("flex flex-wrap items-center justify-between gap-2", SPACE.row)}>
+              <li
+                key={milestone.id}
+                className={cn("flex flex-wrap items-center justify-between gap-2", SPACE.row)}
+              >
                 <span className="font-medium">{milestone.title}</span>
                 <span className="flex items-center gap-2 text-sm text-muted-foreground tabular-nums">
                   {milestone.due < today && <Badge variant="destructive">Overdue</Badge>}
@@ -91,6 +105,10 @@ function WarningItem({ warning }: { warning: Warning }) {
   );
 }
 
+/** The overview's opening line when there is no fresh summary from Claude. */
 function rulesSummary(brief: EventBrief, skeleton: PlanSkeleton): string {
-  return `A ${EVENT_TYPE_LABELS[brief.eventType].toLowerCase()} for ${formatCount(brief.guestCount)} guests on ${formatDate(brief.eventDate)}, with ${formatMoney(skeleton.context.perGuest)} to spend per guest.`;
+  const event = EVENT_TYPE_LABELS[brief.eventType].toLowerCase();
+  const guests = formatCount(brief.guestCount);
+  const perGuest = formatMoney(skeleton.context.perGuest);
+  return `A ${event} for ${guests} guests on ${formatDate(brief.eventDate)}, with ${perGuest} to spend per guest.`;
 }

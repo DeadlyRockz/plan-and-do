@@ -1,6 +1,11 @@
 "use client";
 
-import { ConfettiIcon, DownloadSimpleIcon, HourglassIcon, WarningOctagonIcon } from "@phosphor-icons/react/ssr";
+import {
+  ConfettiIcon,
+  DownloadSimpleIcon,
+  HourglassIcon,
+  WarningOctagonIcon,
+} from "@phosphor-icons/react/ssr";
 import { cn } from "cn";
 import type { IsoDate } from "@/domain/dates";
 import type { PlanMode } from "@/domain/context";
@@ -104,11 +109,25 @@ function MilestoneRow({
   const isOverdue = !isDone && milestone.due < today;
   const isEventDay = milestone.id === "event-day";
   return (
-    <li className={cn("flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between", SPACE.row)}>
+    <li
+      className={cn(
+        "flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between",
+        SPACE.row,
+      )}
+    >
       <div className="flex min-h-11 items-center gap-3">
-        <Checkbox id={id} checked={isDone} onCheckedChange={(next) => onToggle(milestone.id, next === true)} />
-        <Label htmlFor={id} className={cn("text-base font-normal", isDone && "text-muted-foreground line-through")}>
-          {isEventDay && <ConfettiIcon size={18} aria-hidden="true" className="mr-1.5 inline text-primary" />}
+        <Checkbox
+          id={id}
+          checked={isDone}
+          onCheckedChange={(next) => onToggle(milestone.id, next === true)}
+        />
+        <Label
+          htmlFor={id}
+          className={cn("text-base font-normal", isDone && "text-muted-foreground line-through")}
+        >
+          {isEventDay && (
+            <ConfettiIcon size={18} aria-hidden="true" className="mr-1.5 inline text-primary" />
+          )}
           {milestone.title}
         </Label>
       </div>
@@ -126,7 +145,9 @@ function MilestoneRow({
           </Badge>
         )}
         {milestone.optional && <Badge>Optional</Badge>}
-        <span className="text-sm text-muted-foreground tabular-nums">{formatDate(milestone.due)}</span>
+        <span className="text-sm text-muted-foreground tabular-nums">
+          {formatDate(milestone.due)}
+        </span>
       </div>
     </li>
   );

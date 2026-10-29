@@ -1,9 +1,11 @@
-node_modules
-.next
-coverage
-playwright-report
-test-results
-package-lock.json
-plan
-engineering-rules
-CLAUDE.md
+# Anchored with a leading slash: a bare "plan" would also skip src/features/plan and src/app/plan.
+/node_modules
+/.next
+/coverage
+/playwright-report
+/test-results
+/package-lock.json
+# Hand-aligned planning documents and the challenge brief.
+/plan
+/engineering-rules
+/CLAUDE.md

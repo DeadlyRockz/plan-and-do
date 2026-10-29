@@ -23,13 +23,21 @@ type VendorsProps = {
   onToggle: (id: string, booked: boolean) => void;
 };
 
-export function VendorsTab({ vendors, budget, tips, tipSource, booked, today, onToggle }: VendorsProps) {
+export function VendorsTab({
+  vendors,
+  budget,
+  tips,
+  tipSource,
+  booked,
+  today,
+  onToggle,
+}: VendorsProps) {
   return (
     <div className="flex flex-col gap-4">
       <PanelHeading>Vendors</PanelHeading>
       <p className="text-sm text-muted-foreground">
-        {booked.length} of {vendors.length} booked. Each one is on the list for a reason, with the date to
-        book by and what to ask.
+        {booked.length} of {vendors.length} booked. Each one is on the list for a reason, with the
+        date to book by and what to ask.
       </p>
       <ul className="grid grid-cols-1 gap-4 md:grid-cols-2">
         {vendors.map((vendor) => (
@@ -74,7 +82,11 @@ function VendorCard({
       <div className="flex items-start justify-between gap-3">
         <h3 className={TYPE.cardTitle}>{vendor.label}</h3>
         <div className="-mt-3 -mr-1 flex min-h-11 shrink-0 items-center gap-2">
-          <Checkbox id={checkboxId} checked={isBooked} onCheckedChange={(next) => onToggle(vendor.id, next === true)} />
+          <Checkbox
+            id={checkboxId}
+            checked={isBooked}
+            onCheckedChange={(next) => onToggle(vendor.id, next === true)}
+          />
           <Label htmlFor={checkboxId} className="font-normal">
             Booked
           </Label>
@@ -101,7 +113,12 @@ function VendorCard({
       </dl>
       {tip && (
         <p className="flex gap-2 border-l border-primary pl-3 text-sm">
-          <SparkleIcon size={16} weight="fill" aria-hidden="true" className="mt-0.5 shrink-0 text-primary" />
+          <SparkleIcon
+            size={16}
+            weight="fill"
+            aria-hidden="true"
+            className="mt-0.5 shrink-0 text-primary"
+          />
           <span>
             <span className="font-medium">{tipSource === "mock" ? "Sample tip: " : "Tip: "}</span>
             {tip}

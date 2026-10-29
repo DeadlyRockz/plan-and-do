@@ -34,10 +34,9 @@ function renderHeader(overrides: Partial<EventBriefInput> = {}, onDelete = vi.fn
 describe("PlanHeader", () => {
   it("names_each_fact_for_screen_readers_and_counts_down_to_the_day", () => {
     renderHeader({ location: "Pune" });
-    const facts = screen.getAllByRole("term").map((term) => [
-      term.textContent,
-      term.nextElementSibling?.textContent,
-    ]);
+    const facts = screen
+      .getAllByRole("term")
+      .map((term) => [term.textContent, term.nextElementSibling?.textContent]);
     expect(facts).toEqual([
       ["Date", "Mon, 28 Dec 2026 (in 60 days)"],
       ["Guests", "1,200 guests"],

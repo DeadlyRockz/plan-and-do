@@ -22,7 +22,14 @@ const skeleton = buildPlan(brief, TODAY);
 describe("OverviewTab", () => {
   it("lists_every_warning_with_its_severity_in_text", () => {
     render(
-      <OverviewTab brief={brief} skeleton={skeleton} summary={undefined} doneMilestones={[]} today={TODAY} onShowTimeline={() => {}} />,
+      <OverviewTab
+        brief={brief}
+        skeleton={skeleton}
+        summary={undefined}
+        doneMilestones={[]}
+        today={TODAY}
+        onShowTimeline={() => {}}
+      />,
     );
     expect(screen.getAllByText("Critical").length).toBe(
       skeleton.warnings.filter((warning) => warning.severity === "critical").length,
@@ -31,7 +38,14 @@ describe("OverviewTab", () => {
 
   it("community_event_overview_points_to_the_next_three_steps", () => {
     render(
-      <OverviewTab brief={brief} skeleton={skeleton} summary={undefined} doneMilestones={[]} today={TODAY} onShowTimeline={() => {}} />,
+      <OverviewTab
+        brief={brief}
+        skeleton={skeleton}
+        summary={undefined}
+        doneMilestones={[]}
+        today={TODAY}
+        onShowTimeline={() => {}}
+      />,
     );
     const nextUp = screen.getByRole("heading", { name: "Next up" }).parentElement;
     expect(nextUp?.querySelectorAll("ol > li")).toHaveLength(3);
@@ -40,10 +54,20 @@ describe("OverviewTab", () => {
   it("switches_to_the_timeline_on_request", async () => {
     const onShowTimeline = vi.fn();
     render(
-      <OverviewTab brief={brief} skeleton={skeleton} summary="Custom summary." doneMilestones={[]} today={TODAY} onShowTimeline={onShowTimeline} />,
+      <OverviewTab
+        brief={brief}
+        skeleton={skeleton}
+        summary="Custom summary."
+        doneMilestones={[]}
+        today={TODAY}
+        onShowTimeline={onShowTimeline}
+      />,
     );
     await userEvent.setup().click(screen.getByRole("button", { name: /full timeline/i }));
-    expect([onShowTimeline.mock.calls.length, screen.getByText("Custom summary.")]).toEqual([1, expect.anything()]);
+    expect([onShowTimeline.mock.calls.length, screen.getByText("Custom summary.")]).toEqual([
+      1,
+      expect.anything(),
+    ]);
   });
 });
 
@@ -76,13 +100,17 @@ describe("OverviewTab for a calm, on-track plan", () => {
   it("summarises_the_plan_from_the_rules_without_ideas", () => {
     renderOverview([]);
     expect(
-      screen.getByText("A birthday for 30 guests on Mon, 28 Dec 2026, with ₹2,000 to spend per guest."),
+      screen.getByText(
+        "A birthday for 30 guests on Mon, 28 Dec 2026, with ₹2,000 to spend per guest.",
+      ),
     ).toBeInTheDocument();
   });
 
   it("celebrates_when_every_step_before_the_event_is_done", () => {
     renderOverview(calm.milestones.map((milestone) => milestone.id));
-    expect(screen.getByText("Every step before the event is done. Enjoy the day.")).toBeInTheDocument();
+    expect(
+      screen.getByText("Every step before the event is done. Enjoy the day."),
+    ).toBeInTheDocument();
   });
 
   it("flags_next_steps_that_are_already_late", () => {
@@ -108,7 +136,11 @@ describe("VendorsTab", () => {
 
   it("community_event_includes_permits_and_safety", () => {
     renderVendors();
-    expect(["Permits & licences", "First aid", "Security"].map((name) => screen.getByRole("heading", { name }))).toHaveLength(3);
+    expect(
+      ["Permits & licences", "First aid", "Security"].map((name) =>
+        screen.getByRole("heading", { name }),
+      ),
+    ).toHaveLength(3);
   });
 
   it("shows_claudes_tip_on_the_matching_vendor", () => {
@@ -118,7 +150,9 @@ describe("VendorsTab", () => {
 
   it("reports_how_many_vendors_are_booked", () => {
     renderVendors();
-    expect(screen.getByText(new RegExp(`^1 of ${skeleton.vendors.length} booked`))).toBeInTheDocument();
+    expect(
+      screen.getByText(new RegExp(`^1 of ${skeleton.vendors.length} booked`)),
+    ).toBeInTheDocument();
   });
 
   it("flags_unbooked_vendors_past_their_book_by_date", () => {

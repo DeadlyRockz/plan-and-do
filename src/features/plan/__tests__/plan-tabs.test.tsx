@@ -34,13 +34,21 @@ describe("BudgetTab", () => {
   const skeleton = plan();
   const renderBudget = () =>
     render(
-      <BudgetTab budget={skeleton.budget} guestCount={20} perGuest={skeleton.context.perGuest} savingIdeas={[]} />,
+      <BudgetTab
+        budget={skeleton.budget}
+        guestCount={20}
+        perGuest={skeleton.context.perGuest}
+        savingIdeas={[]}
+      />,
     );
 
   it("renders_one_row_header_per_line_plus_a_total", () => {
     renderBudget();
     const rowHeaders = screen.getAllByRole("rowheader").map((cell) => cell.textContent);
-    expect([rowHeaders.length, rowHeaders.at(-1)]).toEqual([skeleton.budget.lines.length + 1, "Total"]);
+    expect([rowHeaders.length, rowHeaders.at(-1)]).toEqual([
+      skeleton.budget.lines.length + 1,
+      "Total",
+    ]);
   });
 
   it("marks_priority_lines_in_text_not_colour_alone", () => {
@@ -180,14 +188,20 @@ describe("IdeasTab", () => {
   const skeleton = plan();
 
   it("shows_a_busy_skeleton_while_loading", () => {
-    const { container } = render(<IdeasTab state={{ status: "loading" }} budget={skeleton.budget} onRefresh={() => {}} />);
+    const { container } = render(
+      <IdeasTab state={{ status: "loading" }} budget={skeleton.budget} onRefresh={() => {}} />,
+    );
     expect(container.querySelector('[aria-busy="true"]')).not.toBeNull();
   });
 
   it("offers_a_retry_when_ideas_fail", async () => {
     const onRefresh = vi.fn();
     render(
-      <IdeasTab state={{ status: "error", message: "The assistant is unavailable." }} budget={skeleton.budget} onRefresh={onRefresh} />,
+      <IdeasTab
+        state={{ status: "error", message: "The assistant is unavailable." }}
+        budget={skeleton.budget}
+        onRefresh={onRefresh}
+      />,
     );
     await userEvent.setup().click(screen.getByRole("button", { name: "Try again" }));
     expect(onRefresh).toHaveBeenCalledOnce();
@@ -200,7 +214,13 @@ describe("IdeasTab", () => {
           status: "ready",
           isDemo: false,
           isStale: true,
-          ideas: { summary: "Fun.", themes: [], vendorTips: [], savingIdeas: [], considerations: [] },
+          ideas: {
+            summary: "Fun.",
+            themes: [],
+            vendorTips: [],
+            savingIdeas: [],
+            considerations: [],
+          },
         }}
         budget={skeleton.budget}
         onRefresh={() => {}}
