@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <!-- Mirrors --primary (oklch 0.521 0.135 150) and --primary-foreground from globals.css. -->
+  <rect width="32" height="32" rx="8" fill="#157E3C"/>
+  <circle cx="16" cy="16" r="6" fill="none" stroke="#FAFAFB" stroke-width="3"/>
+  <circle cx="24" cy="8" r="2" fill="#FAFAFB"/>
+</svg>
