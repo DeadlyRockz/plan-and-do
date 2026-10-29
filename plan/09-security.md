@@ -12,10 +12,10 @@ through model output.
 | T1 | `ANTHROPIC_API_KEY`            | Committed to git, or shipped to the browser                    | `.env*` gitignored; `server-only` in `env.ts` and the adapter; no `NEXT_PUBLIC_` vars; secret scan in CI      | CI secret-scan step; build fails on a client import |
 | T2 | API spend                      | Scripted abuse of the AI routes                                | Per-IP limit of 10/min, global daily cap of 500, 16 KB body cap, `max_tokens` cap, no AI call on page load    | Route tests for 429 and 413                    |
 | T3 | Model behaviour                | Prompt injection through `notes` or `traditions`               | Length caps; content passed in delimited tags as data; system prompt rules; schema-constrained output; one narrow tool with server-validated input | Adapter tests with injection fixtures |
-| T4 | User's browser                 | XSS through model output or brief text                         | React escaping only; no `dangerouslySetInnerHTML`, no markdown-to-HTML, no auto-linked URLs; strict CSP        | ESLint `react/no-danger`; CSP header test      |
+| T4 | User's browser                 | XSS through model output or brief text                         | React escaping only; no `dangerouslySetInnerHTML`, no markdown-to-HTML, no auto-linked URLs; nonce CSP with no `'unsafe-inline'` scripts or style elements | ESLint `react/no-danger`; `csp.test.ts`; `e2e/security.spec.ts` (no violations) |
 | T5 | Server                         | Oversized or malformed JSON, prototype pollution in the patch merge | Body-size guard before parsing; Zod `strict()` objects; patch merged by copying only whitelisted keys     | Route tests                                    |
 | T6 | Privacy                        | Personal data in logs or over-collection                       | Logs hold metadata only (06 §6.9); city-level location; no names, phones or addresses asked; disclosure in the UI | Test asserting the logger never gets brief text |
-| T7 | Supply chain                   | A vulnerable or malicious dependency                           | Lockfile committed; `npm ci`; `npm audit` clean (0 known vulnerabilities) and gated at `high` in CI; minimal dependencies, no unused CLIs installed (03 §3.3) | CI                                             |
+| T7 | Supply chain                   | A vulnerable or malicious dependency, or an insecure code pattern | Lockfile committed; `npm ci`; `npm audit` clean (0 known vulnerabilities) and gated at `high` in CI; minimal dependencies, no unused CLIs installed (03 §3.3); CodeQL `security-extended` on every push | CI, `codeql.yml`                               |
 | T8 | Clickjacking and sniffing      | The app embedded in a frame, content-type confusion, or a cross-origin window reaching ours | `frame-ancestors 'none'`, `X-Frame-Options: DENY`, `nosniff`, `Cross-Origin-Opener-Policy` and `Cross-Origin-Resource-Policy: same-origin` | `security-headers.test.ts`, `csp.test.ts`      |
 | T9 | API spend                      | Another website makes visitors' browsers call the AI routes (cross-site request forgery) | AI routes accept only `Content-Type: application/json`, which forces a CORS preflight they never answer, and reject any `Sec-Fetch-Site` other than `same-origin` | Route tests for 403 and 415                    |
 
@@ -59,7 +59,7 @@ through model output.
 
 | Header                      | Value                                                                                                            |
 | --------------------------- | ---------------------------------------------------------------------------------------------------------------- |
-| `Content-Security-Policy`   | `default-src 'self'; script-src 'self' 'nonce-…'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; font-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'` |
+| `Content-Security-Policy`   | `default-src 'self'; script-src 'self' 'nonce-…' 'strict-dynamic'; style-src 'self' 'nonce-…' 'sha256-<sonner>' 'sha256-<empty>'; style-src-attr 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self'; object-src 'none'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'` |
 | `X-Content-Type-Options`    | `nosniff`                                                                                                        |
 | `Referrer-Policy`           | `strict-origin-when-cross-origin`                                                                                |
 | `Permissions-Policy`        | `camera=(), microphone=(), geolocation=(), payment=(), usb=(), browsing-topics=()`                               |
@@ -68,7 +68,12 @@ through model output.
 | `X-Frame-Options`           | `DENY` (for browsers that predate `frame-ancestors`)                                                             |
 | `Strict-Transport-Security` | `max-age=63072000; includeSubDomains; preload` (production only)                                                 |
 
-`connect-src 'self'` is possible because the browser never talks to Anthropic directly. For
+`connect-src 'self'` is possible because the browser never talks to Anthropic directly.
+`<style>` elements need the nonce: next-themes and Radix's scroll lock receive it (Radix through
+`get-nonce`, set by `StyleNonce`), and sonner's one fixed stylesheet is allowed by its hash, which
+a unit test recomputes from the installed package. Only style attributes stay inline (the budget
+bars set their width that way); they cannot load resources or run script. `e2e/security.spec.ts`
+walks the whole app and fails on any CSP violation. For
 Next.js inline scripts, use nonce-based CSP following the current Next.js docs; no
 `'unsafe-eval'` in production. If a nonce setup blocks Phase 7, write down the deviation and its
 reason in an ADR rather than quietly loosening the policy (Rule 04.4).

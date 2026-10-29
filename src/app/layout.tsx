@@ -3,6 +3,7 @@ import { Geist } from "next/font/google";
 import { headers } from "next/headers";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
+import { StyleNonce } from "@/components/style-nonce";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
 import "./globals.css";
@@ -29,6 +30,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
     >
       <body className="flex flex-col">
         <ThemeProvider nonce={nonce}>
+          <StyleNonce nonce={nonce} />
           <a
             href="#main"
             className="sr-only z-50 rounded-lg bg-primary px-4 py-3 font-medium text-primary-foreground focus:not-sr-only focus:fixed focus:top-2 focus:left-2"

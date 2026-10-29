@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildContentSecurityPolicy } from "../csp";
+import { buildContentSecurityPolicy, EMPTY_STYLE_HASH, SONNER_STYLE_HASH } from "../csp";
 
 describe("buildContentSecurityPolicy", () => {
   const production = buildContentSecurityPolicy("abc123", false);
@@ -20,6 +20,24 @@ describe("buildContentSecurityPolicy", () => {
       production.includes("frame-ancestors 'none'"),
       production.includes("connect-src 'self';"),
     ]).toEqual([true, true]);
+  });
+
+  it("allows_style_elements_only_with_the_nonce_or_a_known_hash_in_production", () => {
+    expect(production).toContain(
+      `style-src 'self' 'nonce-abc123' '${SONNER_STYLE_HASH}' '${EMPTY_STYLE_HASH}';`,
+    );
+  });
+
+  it("keeps_style_attributes_allowed_for_the_budget_bars", () => {
+    expect(production).toContain("style-src-attr 'unsafe-inline';");
+  });
+
+  it("opens_inline_style_elements_only_in_development_for_hot_reloading", () => {
+    const development = buildContentSecurityPolicy("abc123", true);
+    expect([
+      /style-src [^;]*'unsafe-inline'/.test(production),
+      development.includes("style-src 'self' 'unsafe-inline';"),
+    ]).toEqual([false, true]);
   });
 
   it("adds_eval_and_the_hmr_socket_only_in_development", () => {
